@@ -1,8 +1,6 @@
 name: Issue-to-PR
 description: 'Convert an issue to a pull request for a file containing the issue text.'
-inputs:
 
-outputs:
 
 runs:
   using: 'node12'
