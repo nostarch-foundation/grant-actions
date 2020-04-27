@@ -44,7 +44,7 @@ async function run() {
         sha: currentsha
       });
 
-    //console.log(branch)
+    console.log(branch)
 
     // create file from issue body and commit it to the branch
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
@@ -59,13 +59,13 @@ async function run() {
         path: path,
         message: commitMessage,
         content: fileContents,
-        committer.name: 'GitHub Action',
-        committer.email: 'action@github.com',
-        author.name: 'GitHub Action',
-        author.email: 'action@github.com'
+        'committer.name': 'GitHub Action',
+        'committer.email': 'action@github.com',
+        'author.name': 'GitHub Action',
+        'author.email': 'action@github.com'
       });
 
-    //console.log(ret);
+    console.log(ret);
 
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
@@ -83,7 +83,7 @@ async function run() {
         draft: true
     });
 
-    //console.log(pullRequest);
+    console.log(pullRequest);
   } 
   catch (error) {
     core.setFailed(error.message);

@@ -7,13 +7,13 @@ const path = require('path');
 //    await expect(wait('foo')).rejects.toThrow('milleseconds not a number');
 //});
 
-//test('wait 500 ms', async() => {
-//    const start = new Date();
-//    await wait(500);
-//    const end = new Date();
-//    var delta = Math.abs(end - start);
-//    expect(delta).toBeGreaterThan(450);
-//});
+test('wait 500 ms', async() => {
+    const start = new Date();
+    await wait(500);
+    const end = new Date();
+    var delta = Math.abs(end - start);
+    expect(delta).toBeGreaterThan(450);
+});
 
 // shows how the runner will run a javascript action with env / stdout protocol
 //test('test runs', () => {
