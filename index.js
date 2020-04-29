@@ -1,21 +1,19 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-// most @actions toolkit packages have async methods
-async function run() {
-  try { 
-    // This should be a token with access to your repository scoped in as a secret.
-    // The YML workflow will need to set myToken with the GitHub Secret Token
-    // myToken: ${{ secrets.GITHUB_TOKEN }}
-    // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/authenticating-with-the-github_token#about-the-github_token-secret
-    const myToken = core.getInput('myToken');
+// When a new issue is opened, automatically add it to a GitHub project to facilitate review.
+function issue2project(octokit) {
+	// Create project card from issue 
+	// https://developer.github.com/v3/projects/cards/#create-a-project-card
+	
+	// Store resulting card ID (will be needed for `New PR to Project Column`)
+}
 
-    const octokit = new github.GitHub(myToken);
-
+// When an issue is given the ‘review’ label, convert it to a pull request.
+function issue2pr(octokit) {
     // get reference 
     // https://developer.github.com/v3/git/refs/#get-a-single-reference
     // https://octokit.github.io/rest.js/v17#git-get-ref
-
     const { data: master } = await octokit.git.getRef({
         owner: 'nostarch-foundation',
         repo: 'wip-grant-submissions',
@@ -84,6 +82,46 @@ async function run() {
     });
 
     console.log(pullRequest);
+
+}
+
+// When an issue is converted to a pull request, move the associated card to next column.
+function pr2project(octokit) {
+	// PullRequestEvent opened
+	// https://developer.github.com/v3/activity/events/types/#pullrequestevent
+	
+	// Get project card ID
+	
+	// Move a project card
+	// https://developer.github.com/v3/projects/cards/#move-a-project-card
+}
+
+// most @actions toolkit packages have async methods
+async function run() {
+	try { 
+	    // This should be a token with access to your repository scoped in as a secret.
+		// The YML workflow will need to set myToken with the GitHub Secret Token
+		// myToken: ${{ secrets.GITHUB_TOKEN }}
+		// https://help.github.com/en/actions/automating-your-workflow-with-github-actions/authenticating-with-the-github_token#about-the-github_token-secret
+		const myToken = core.getInput('myToken');
+
+		// Authenticated Octokit client
+		const octokit = new github.GitHub(myToken);
+	
+		const workflow = core.getInput('workflow')
+		switch (workflow) {
+			case "issue2project":
+				issue2project(octokit);
+				break;
+			case "issue2pr":
+				issue2pr(octokit);
+				break;
+			case "pr2project": 
+				pr2project(octokit);
+				break;
+			default:
+				break;
+		}
   } 
   catch (error) {
     core.setFailed(error.message);
