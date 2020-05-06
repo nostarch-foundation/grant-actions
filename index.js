@@ -20,17 +20,6 @@ function issue2project(octokit) {
 	// https://developer.github.com/v3/projects/
 	// https://octokit.github.io/rest.js/v17#pagination
 	const projectURL = core.getInput('projectURL');
-		{ owner: owner,	repo: repo,	state: 'open' },
-		(response, done) => {
-			  if (response.data.find((projects) => project.name.includes(grantApps))) {
-				done();
-			  }
-			  return response.data;
-	})
-	.then((projects) => {
-		// projects is an array of all project objects for the repo
-		
-	}); */
 	var projectId = 0;
 	for await (const response of octokit.paginate.iterator(
 	  octokit.projects.listForRepo,
