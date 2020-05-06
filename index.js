@@ -34,7 +34,7 @@ function issue2project(octokit) {
 				break;
 		}
 	}
-	if (projectID == 0) { console.log("No such project"); return; }
+	if (projectID == 0) { core.debug("No such project"); return; }
 	
 	// Find column ID
 	// https://octokit.github.io/rest.js/v17#projects-list-columns
@@ -53,7 +53,7 @@ function issue2project(octokit) {
 				break;
 		}
 	}	
-	if (colID == 0) { console.log("No such column"); return; }
+	if (colID == 0) { core.debug("No such column"); return; }
 	
 	// Create project card from issue 
 	// https://developer.github.com/v3/projects/cards/#create-a-project-card
@@ -79,7 +79,7 @@ function issue2pr(octokit) {
     const owner = issue.repository.owner.login;
     const repo = issue.repository.name;
 	
-	console.log("woo printf debugging")
+	core.debug("woo printf debugging")
 
     // get reference
     // https://developer.github.com/v3/git/refs/#get-a-single-reference
@@ -112,7 +112,7 @@ function issue2pr(octokit) {
             data
         }) => {
         // handle data
-		console.log(data)
+		core.debug(data)
     });
 
     // create file from issue body and commit it to the branch
@@ -137,7 +137,7 @@ function issue2pr(octokit) {
             data
         }) => {
         // handle data
-		console.log(data)
+		core.debug(data)
     });
 
     // create pull request for the branch
@@ -159,7 +159,7 @@ function issue2pr(octokit) {
             data
         }) => {
         // handle data
-		console.log(data)
+		core.debug(data)
     });
 }
 
