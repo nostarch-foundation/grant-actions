@@ -20,6 +20,7 @@ jobs:
  #           columnName: 'Applications'
         - name: convert-issue-to-pr
           uses: actions/checkout@v1
+          users: ./
           if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'Review'
           with:
             myToken: ${{ secrets.GITHUB_TOKEN }}
