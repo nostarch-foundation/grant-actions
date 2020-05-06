@@ -70,10 +70,12 @@ const cardId = card.id;
 function issue2pr(octokit) {
     // Trigger: issue is given 'review' label
     // issue context
-    // https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
-    // github.context.event is the webhook payload, in this case the issues event payload
+    // https://help.github.com/en/actions/building-actions/creating-a-javascript-action
+    // github.context.payload is the webhook payload, in this case the issues event payload?
     // https://developer.github.com/v3/activity/events/types/#issuesevent
-    const issue = github.context.event.issue;
+    const payload = JSON.stringify(github.context.payload, undefined, 2);
+    console.log(`The event payload: ${payload}`);
+    const issue = github.context.payload.issue;
     const owner = issue.repository.owner.login;
     const repo = issue.repository.name;
 
