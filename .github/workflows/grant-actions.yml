@@ -10,8 +10,8 @@ jobs:
     grant-actions:
         runs-on: ubuntu-latest
         steps:
-            - name: convert-issue-to-pr
-              uses: actions/checkout@v1
+            - uses: actions/checkout@v1 # this is a step
+            - name: convert-issue-to-pr # this is another step
               uses: ./
               if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'Review'
               with:
