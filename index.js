@@ -78,6 +78,8 @@ function issue2pr(octokit) {
     const issue = github.context.event.issue;
     const owner = issue.repository.owner.login;
     const repo = issue.repository.name;
+	
+	console.log("woo printf debugging")
 
     // get reference
     // https://developer.github.com/v3/git/refs/#get-a-single-reference
