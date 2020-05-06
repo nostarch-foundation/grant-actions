@@ -33,7 +33,7 @@ projectID = project.id;
 break;
 }
 }
-if (projectID == 0) { core.debug("No such project"); return; }
+if (projectID == 0) { console.log("No such project"); return; }
 
 // Find column ID
 // https://octokit.github.io/rest.js/v17#projects-list-columns
@@ -51,7 +51,7 @@ colId = column.id;
 break;
 }
 }
-if (colID == 0) { core.debug("No such column"); return; }
+if (colID == 0) { console.log("No such column"); return; }
 
 // Create project card from issue
 // https://developer.github.com/v3/projects/cards/#create-a-project-card
@@ -77,7 +77,7 @@ function issue2pr(octokit) {
     const owner = issue.repository.owner.login;
     const repo = issue.repository.name;
 
-    core.debug("woo printf debugging");
+    console.log("woo printf debugging");
 
     // get reference
     // https://developer.github.com/v3/git/refs/#get-a-single-reference
@@ -110,7 +110,7 @@ function issue2pr(octokit) {
             data
         }) => {
         // handle data
-        core.debug(data);
+        console.log(data);
     });
 
     // create file from issue body and commit it to the branch
@@ -135,7 +135,7 @@ function issue2pr(octokit) {
             data
         }) => {
         // handle data
-        core.debug(data);
+        console.log(data);
     });
 
     // create pull request for the branch
@@ -157,7 +157,7 @@ function issue2pr(octokit) {
             data
         }) => {
         // handle data
-        core.debug(data);
+        console.log(data);
     });
 }
 
@@ -178,7 +178,6 @@ function issue2pr(octokit) {
 async function run() {
     try {
         console.log("am I here?");
-        core.debug("where am I?");
         // This should be a token with access to your repository scoped in as a secret.
         // The YML workflow will need to set myToken with the GitHub Secret Token
         // myToken: ${{ secrets.GITHUB_TOKEN }}
