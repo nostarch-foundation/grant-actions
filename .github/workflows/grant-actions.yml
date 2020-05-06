@@ -10,14 +10,14 @@ jobs:
     grant-actions:
         runs-on: ubuntu-latest
         steps:
-        - name: add-project-card-for-issue-to-applications-column
-          uses: ./
-          if: github.event_name == 'issues' && github.event.action == 'opened'
-          with:
-            myToken: ${{ secrets.GITHUB_TOKEN }}
-            step: 'issue2project'
-            projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
-            columnName: 'Applications'
+ #       - name: add-project-card-for-issue-to-applications-column
+ #         uses: ./
+ #         if: github.event_name == 'issues' && github.event.action == 'opened'
+ #         with:
+ #           myToken: ${{ secrets.GITHUB_TOKEN }}
+ #           step: 'issue2project'
+ #           projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
+ #           columnName: 'Applications'
         - name: convert-issue-to-pr
           uses: ./
           if: github.event_name == 'issues' && github.event.action == 'labeled' && issue.event.label == 'Review'
@@ -29,6 +29,6 @@ jobs:
 #          if: github.event_name == 'pull_request' && github.event.action == 'opened'
 #          with:  
 #            myToken: ${{ secrets.GITHUB_TOKEN }}
-#            step: 'pr2project'
+#            step: 'movePRcard'
 #            projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
 #            columnName: 'Review'

@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-
+/*
 // When a new issue is opened, automatically add it to a GitHub project to facilitate review.
 function issue2project(octokit) {
 	// Trigger: issue opened
@@ -67,7 +67,7 @@ function issue2project(octokit) {
 	// Store resulting card ID (will be needed for `New PR to Project Column`)
 	const cardId = card.id;
 }
-
+*/
 // When an issue is given the ‘review’ label, convert it to a pull request.
 function issue2pr(octokit) {
     // Trigger: issue is given 'review' label
@@ -149,7 +149,7 @@ function issue2pr(octokit) {
 }
 
 // When an issue is converted to a pull request, move the associated card to next column.
-function pr2project(octokit) {
+function movePRcard(octokit) {
 	// Trigger: PullRequestEvent opened
 	// https://developer.github.com/v3/activity/events/types/#pullrequestevent
 	
@@ -175,14 +175,14 @@ async function run() {
 	
 		const step = core.getInput('step')
 		switch (step) {
-			case "issue2project":
-				issue2project(octokit);
-				break;
+//			case "issue2project":
+//				issue2project(octokit);
+//				break;
 			case "issue2pr":
 				issue2pr(octokit);
 				break;
-//			case "pr2project": 
-//				pr2project(octokit);
+//			case "movePRcard": 
+//				movePRcard(octokit);
 //				break;
 			default:
 				break;
