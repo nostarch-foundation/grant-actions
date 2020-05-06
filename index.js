@@ -71,61 +71,55 @@ function issue2project(octokit) {
 // When an issue is given the ‘review’ label, convert it to a pull request.
 function issue2pr(octokit) {
     // Trigger: issue is given 'review' label
-	// issue context
+    // issue context
     // https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
     // github.context.event is the webhook payload, in this case the issues event payload
     // https://developer.github.com/v3/activity/events/types/#issuesevent
     const issue = github.context.event.issue;
-	const owner = issue.repository.owner.login;
-	const repo = issue.repository.name;
-	
-	// get reference 
+    const owner = issue.repository.owner.login;
+    const repo = issue.repository.name;
+
+    // get reference
     // https://developer.github.com/v3/git/refs/#get-a-single-reference
     // https://octokit.github.io/rest.js/v17#git-get-ref
-/*    const { data: master } = await octokit.git.getRef({
-        owner: owner,
-        repo: repo,
-        ref: 'heads/master'
-      });
-*/
+    var currentsha = 0;
     octokit.git.getRef({
         owner: owner,
         repo: repo,
         ref: 'heads/master'
-      })
-	  .then(({ data }) => {
-		  // handle data
-	  });
-
-    //console.log(master);
-    var currentsha = master.object.sha;
-	
-    var issueUser = issue.user.login;
-    var issueNum = issue.number;
+    })
+    .then(({
+            data
+        }) => {
+        currentsha = data.object.sha;
+    });
 
     // create branch
     // https://developer.github.com/v3/git/refs/#create-a-reference
     // https://octokit.github.io/rest.js/v17#git-create-ref
-    var branchName = "request-"+issueUser+"-"+issueNum;	
+    var issueUser = issue.user.login;
+    var issueNum = issue.number;
+    var branchName = "request-" + issueUser + "-" + issueNum;
     octokit.git.createRef({
         owner: owner,
         repo: repo,
-        ref: 'refs/heads/'+branchName,
+        ref: 'refs/heads/' + branchName,
         sha: currentsha
-      })
-	  .then(({ data }) => {
-		  // handle data
-	  });
-
-    console.log(branch)
+    })
+    .then(({
+            data
+        }) => {
+        // handle data
+		console.log(data)
+    });
 
     // create file from issue body and commit it to the branch
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
     // https://octokit.github.io/rest.js/v17#repos-create-or-update-file
-    var filename = "grant-"+issueUser+"-"+issue.number+".md";
+    var filename = "grant-" + issueUser + "-" + issue.number + ".md";
     var path = "https://api.github.com/repos/nostarch-foundation/wip-grant-submissions/contents/grants/" + filename;
-    var commitMessage = "Request #"+issue.number+" by "+issueUser;
-    var fileContents = Buffer.from(issue.body).toString('base64');	
+    var commitMessage = "Request #" + issue.number + " by " + issueUser;
+    var fileContents = Buffer.from(issue.body).toString('base64');
     octokit.repos.createOrUpdateFile({
         owner: owner,
         repo: repo,
@@ -136,18 +130,19 @@ function issue2pr(octokit) {
         'committer.email': 'action@github.com',
         'author.name': 'GitHub Action',
         'author.email': 'action@github.com'
-      })
-	  .then(({ data }) => {
-		  // handle data
-	  });
-
-    console.log(ret);
+    })
+    .then(({
+            data
+        }) => {
+        // handle data
+		console.log(data)
+    });
 
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
-    var PRbody = "# Grant request for review. \n Submitted by "+issueUser+", [original issue]("+issue.url+")";
-    var PRtitle = "[Review] Request by "+issueUser;
+    var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + issue.url + ")";
+    var PRtitle = "[Review] Request by " + issueUser;
     octokit.pulls.create({
         owner: 'nostarch-foundation',
         repo: 'wip-grant-submissions',
@@ -158,16 +153,16 @@ function issue2pr(octokit) {
         maintainer_can_modify: true,
         draft: true
     })
-	  .then(({ data }) => {
-		  // handle data
-	  });
-
-    console.log(pullRequest);
-
+    .then(({
+            data
+        }) => {
+        // handle data
+		console.log(data)
+    });
 }
 
 // When an issue is converted to a pull request, move the associated card to next column.
-function movePRcard(octokit) {
+//function movePRcard(octokit) {
 	// Trigger: PullRequestEvent opened
 	// https://developer.github.com/v3/activity/events/types/#pullrequestevent
 	
@@ -177,38 +172,37 @@ function movePRcard(octokit) {
 	// Move a project card
 	// https://developer.github.com/v3/projects/cards/#move-a-project-card
 	// https://octokit.github.io/rest.js/v17#projects-move-card
-}
+//}
 
 // most @actions toolkit packages have async methods
 async function run() {
-	try { 
-	    // This should be a token with access to your repository scoped in as a secret.
-		// The YML workflow will need to set myToken with the GitHub Secret Token
-		// myToken: ${{ secrets.GITHUB_TOKEN }}
-		// https://help.github.com/en/actions/automating-your-workflow-with-github-actions/authenticating-with-the-github_token#about-the-github_token-secret
-		const myToken = core.getInput('myToken');
+    try {
+        // This should be a token with access to your repository scoped in as a secret.
+        // The YML workflow will need to set myToken with the GitHub Secret Token
+        // myToken: ${{ secrets.GITHUB_TOKEN }}
+        // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/authenticating-with-the-github_token#about-the-github_token-secret
+        const myToken = core.getInput('myToken');
 
-		// Authenticated Octokit client
-		const octokit = new github.GitHub(myToken);
-	
-		const step = core.getInput('step')
-		switch (step) {
-//			case "issue2project":
-//				issue2project(octokit);
-//				break;
-			case "issue2pr":
-				issue2pr(octokit);
-				break;
-//			case "movePRcard": 
-//				movePRcard(octokit);
-//				break;
-			default:
-				break;
-		}
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
+        // Authenticated Octokit client
+        const octokit = new github.GitHub(myToken);
+
+        const step = core.getInput('step')
+            switch (step) {
+                //			case "issue2project":
+                //				issue2project(octokit);
+                //				break;
+            case "issue2pr":
+                issue2pr(octokit);
+                break;
+                //			case "movePRcard":
+                //				movePRcard(octokit);
+                //				break;
+            default:
+                break;
+            }
+    } catch (error) {
+        core.setFailed(error.message);
+    }
 }
 
 run()
