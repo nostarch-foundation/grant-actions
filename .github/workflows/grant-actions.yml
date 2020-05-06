@@ -19,8 +19,8 @@ jobs:
  #           projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
  #           columnName: 'Applications'
         - name: convert-issue-to-pr
-          uses: actions/checkout@v1
-          users: ./
+        - uses: actions/checkout@v1
+        - uses: ./
           if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'Review'
           with:
             myToken: ${{ secrets.GITHUB_TOKEN }}

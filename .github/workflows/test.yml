@@ -21,6 +21,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: ./
-    with:
+      with:
         step: 'issue2pr'
         myToken: $ {{ secrets.GITHUB_TOKEN }}
