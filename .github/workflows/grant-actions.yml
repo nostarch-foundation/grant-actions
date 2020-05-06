@@ -10,21 +10,21 @@ jobs:
     grant-actions:
         runs-on: ubuntu-latest
         steps:
- #       - name: add-project-card-for-issue-to-applications-column
- #         uses: ./
- #         if: github.event_name == 'issues' && github.event.action == 'opened'
- #         with:
- #           myToken: ${{ secrets.GITHUB_TOKEN }}
- #           step: 'issue2project'
- #           projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
- #           columnName: 'Applications'
-        - name: convert-issue-to-pr
-        - uses: actions/checkout@v1
-        - uses: ./
-          if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'Review'
-          with:
-            myToken: ${{ secrets.GITHUB_TOKEN }}
-            step: 'issue2pr'
+            - name: convert-issue-to-pr
+              uses: actions/checkout@v1
+              uses: ./
+              if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'Review'
+              with:
+                myToken: ${{ secrets.GITHUB_TOKEN }}
+                step: 'issue2pr'
+#       - name: add-project-card-for-issue-to-applications-column
+#         uses: ./
+#         if: github.event_name == 'issues' && github.event.action == 'opened'
+#         with:
+#           myToken: ${{ secrets.GITHUB_TOKEN }}
+#           step: 'issue2project'
+#           projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
+#           columnName: 'Applications'
 #        - name: move-card-for-pr-to-review-column
 #          uses: ./
 #          if: github.event_name == 'pull_request' && github.event.action == 'opened'
