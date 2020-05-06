@@ -74,11 +74,11 @@ function issue2pr(octokit) {
     // github.context.payload is the webhook payload, in this case the issues event payload?
     // https://developer.github.com/v3/activity/events/types/#issuesevent
 
-    const issue = github.context.payload.issue;
-    const payload = JSON.stringify(issue, undefined, 2);
-    console.log(`The issue payload: ${payload}`);	
-    const owner = issue.repository.owner.login;
-    const repo = issue.repository.name;
+    //const issue = github.context.payload.issue;
+    //const payload = JSON.stringify(issue, undefined, 2);
+    //console.log(`The issue payload: ${payload}`);	
+    const owner = github.context.payload.issue.repository.owner.login;
+    const repo = github.context.payload.issue.repository.name;
 
     console.log("woo printf debugging");
 
@@ -100,8 +100,8 @@ function issue2pr(octokit) {
     // create branch
     // https://developer.github.com/v3/git/refs/#create-a-reference
     // https://octokit.github.io/rest.js/v17#git-create-ref
-    var issueUser = issue.user.login;
-    var issueNum = issue.number;
+    var issueUser = github.context.payload.issue.user.login;
+    var issueNum = github.context.payload.issue.number;
     var branchName = "request-" + issueUser + "-" + issueNum;
     octokit.git.createRef({
         owner: owner,
@@ -119,10 +119,10 @@ function issue2pr(octokit) {
     // create file from issue body and commit it to the branch
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
     // https://octokit.github.io/rest.js/v17#repos-create-or-update-file
-    var filename = "grant-" + issueUser + "-" + issue.number + ".md";
+    var filename = "grant-" + issueUser + "-" + issueNum + ".md";
     var path = "https://api.github.com/repos/nostarch-foundation/wip-grant-submissions/contents/grants/" + filename;
-    var commitMessage = "Request #" + issue.number + " by " + issueUser;
-    var fileContents = Buffer.from(issue.body).toString('base64');
+    var commitMessage = "Request #" + issueNum + " by " + issueUser;
+    var fileContents = Buffer.from(github.context.payload.issue.body).toString('base64');
     octokit.repos.createOrUpdateFile({
         owner: owner,
         repo: repo,
@@ -144,7 +144,7 @@ function issue2pr(octokit) {
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
-    var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + issue.url + ")";
+    var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + ")";
     var PRtitle = "[Review] Request by " + issueUser;
     octokit.pulls.create({
         owner: 'nostarch-foundation',
