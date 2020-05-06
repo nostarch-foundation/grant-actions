@@ -21,11 +21,13 @@ jobs:
         - name: convert-issue-to-pr
           uses: ./
           if: github.event_name == 'issues' && github.event.action == 'labeled' && issue.event.label == 'Review'
+          with:
             myToken: ${{ secrets.GITHUB_TOKEN }}
             step: 'issue2pr'
 #        - name: move-card-for-pr-to-review-column
 #          uses: ./
 #          if: github.event_name == 'pull_request' && github.event.action == 'opened'
+#          with:  
 #            myToken: ${{ secrets.GITHUB_TOKEN }}
 #            step: 'pr2project'
 #            projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
