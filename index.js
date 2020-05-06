@@ -79,7 +79,7 @@ function issue2pr(octokit) {
     const owner = issue.repository.owner.login;
     const repo = issue.repository.name;
 	
-	core.debug("woo printf debugging")
+	core.debug("woo printf debugging");
 
     // get reference
     // https://developer.github.com/v3/git/refs/#get-a-single-reference
@@ -112,7 +112,7 @@ function issue2pr(octokit) {
             data
         }) => {
         // handle data
-		core.debug(data)
+		core.debug(data);
     });
 
     // create file from issue body and commit it to the branch
@@ -137,7 +137,7 @@ function issue2pr(octokit) {
             data
         }) => {
         // handle data
-		core.debug(data)
+		core.debug(data);
     });
 
     // create pull request for the branch
@@ -159,7 +159,7 @@ function issue2pr(octokit) {
             data
         }) => {
         // handle data
-		core.debug(data)
+		core.debug(data);
     });
 }
 
@@ -179,11 +179,13 @@ function issue2pr(octokit) {
 // most @actions toolkit packages have async methods
 async function run() {
     try {
-        // This should be a token with access to your repository scoped in as a secret.
+        console.log("am I here?");
+		core.debug("where am I?");
+		// This should be a token with access to your repository scoped in as a secret.
         // The YML workflow will need to set myToken with the GitHub Secret Token
         // myToken: ${{ secrets.GITHUB_TOKEN }}
         // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/authenticating-with-the-github_token#about-the-github_token-secret
-        const myToken = core.getInput('myToken');
+       	   const myToken = core.getInput('myToken');
 
         // Authenticated Octokit client
         const octokit = new github.GitHub(myToken);
