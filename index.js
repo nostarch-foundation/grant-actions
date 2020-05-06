@@ -3,31 +3,105 @@ const github = require('@actions/github');
 
 // When a new issue is opened, automatically add it to a GitHub project to facilitate review.
 function issue2project(octokit) {
+	// Trigger: issue opened
+	// issue context
+    // https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
+    // github.context.event is the webhook payload, in this case the issues event payload
+    // https://developer.github.com/v3/activity/events/types/#issuesevent
+    const issue = github.context.event.issue;
+	const owner = issue.repository.owner.login;
+	const repo = issue.repository.name;
+	
+	// Cribbing from github-actions-automate-projects
+	// https://github.com/takanabe/github-actions-automate-projects/blob/master/main.go
+	
+	// Find project ID
+	// https://octokit.github.io/rest.js/v17#projects-list-for-repo
+	// https://developer.github.com/v3/projects/
+	// https://octokit.github.io/rest.js/v17#pagination
+	const projectURL = core.getInput('projectURL');
+		{ owner: owner,	repo: repo,	state: 'open' },
+		(response, done) => {
+			  if (response.data.find((projects) => project.name.includes(grantApps))) {
+				done();
+			  }
+			  return response.data;
+	})
+	.then((projects) => {
+		// projects is an array of all project objects for the repo
+		
+	}); */
+	var projectId = 0;
+	for await (const response of octokit.paginate.iterator(
+	  octokit.projects.listForRepo,
+	  {
+		owner: owner,
+		repo: repo,
+	  }
+	)) {
+		const { data : project } = response;
+		if (project.html_url == projectURL) { // brittle?
+				projectID = project.id;
+				break;
+		}
+	}
+	if (projectID == 0) { console.log("No such project"); return; }
+	
+	// Find column ID
+	// https://octokit.github.io/rest.js/v17#projects-list-columns
+	// https://developer.github.com/v3/projects/columns/#list-project-columns
+	const colName = core.getInput('columnName');
+	var colId = 0;
+	for await (const response of octokit.paginate.iterator(
+	  octokit.projects.listColumns,
+	  {
+		project_id: projectID,
+	  }
+	)) {
+		const { data : column } = response;
+		if (column.name == colName) { // brittle?
+				colId = column.id;
+				break;
+		}
+	}	
+	if (colID == 0) { console.log("No such column"); return; }
+	
 	// Create project card from issue 
 	// https://developer.github.com/v3/projects/cards/#create-a-project-card
+	// https://octokit.github.io/rest.js/v17#projects-create-card
+	const { data: card } = octokit.projects.createCard({
+		column_id: colId,
+		content_id: github.context.event.issue.id,
+		content_type: 'Issue',
+	});
 	
 	// Store resulting card ID (will be needed for `New PR to Project Column`)
+	const cardId = card.id;
 }
 
 // When an issue is given the ‘review’ label, convert it to a pull request.
 function issue2pr(octokit) {
-    // get reference 
+    // Trigger: issue is given 'review' label
+	// issue context
+    // https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
+    // github.context.event is the webhook payload, in this case the issues event payload
+    // https://developer.github.com/v3/activity/events/types/#issuesevent
+    const issue = github.context.event.issue;
+	const owner = issue.repository.owner.login;
+	const repo = issue.repository.name;
+	
+	// get reference 
     // https://developer.github.com/v3/git/refs/#get-a-single-reference
     // https://octokit.github.io/rest.js/v17#git-get-ref
     const { data: master } = await octokit.git.getRef({
-        owner: 'nostarch-foundation',
-        repo: 'wip-grant-submissions',
+        owner: owner,
+        repo: repo,
         ref: 'heads/master'
       });
 
     //console.log(master);
     var currentsha = master.object.sha;
-
-    // issue context
-    // https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
-    // github.context.event is the webhook payload, in this case the issues event payload
-    // https://developer.github.com/v3/activity/events/types/#issuesevent
-    const issue = github.context.event.issue;	
+	
     var issueUser = issue.user.login;
     var issueNum = issue.number;
 
@@ -36,8 +110,8 @@ function issue2pr(octokit) {
     // https://octokit.github.io/rest.js/v17#git-create-ref
     var branchName = "request-"+issueUser+"-"+issueNum;	
     const { data: branch} = await octokit.git.createRef({
-        owner: 'nostarch-foundation',
-        repo: 'wip-grant-submissions',
+        owner: owner,
+        repo: repo,
         ref: 'refs/heads/'+branchName,
         sha: currentsha
       });
@@ -52,8 +126,8 @@ function issue2pr(octokit) {
     var commitMessage = "Request #"+issue.number+" by "+issueUser;
     var fileContents = Buffer.from(issue.body).toString('base64');	
     const {data: ret} = await octokit.repos.createOrUpdateFile({
-        owner: 'nostarch-foundation',
-        repo: 'wip-grant-submissions',
+        owner: owner,
+        repo: repo,
         path: path,
         message: commitMessage,
         content: fileContents,
@@ -71,8 +145,8 @@ function issue2pr(octokit) {
     var PRbody = "# Grant request for review. \n Submitted by "+issueUser+", [original issue]("+issue.url+")";
     var PRtitle = "[Review] Request by "+issueUser;
     const { data: pullRequest } = await octokit.pulls.create({
-          owner: 'nostarch-foundation',
-          repo: 'wip-grant-submissions',
+        owner: 'nostarch-foundation',
+        repo: 'wip-grant-submissions',
         head: branchName,
         base: 'master',
         title: PRtitle,
@@ -87,13 +161,15 @@ function issue2pr(octokit) {
 
 // When an issue is converted to a pull request, move the associated card to next column.
 function pr2project(octokit) {
-	// PullRequestEvent opened
+	// Trigger: PullRequestEvent opened
 	// https://developer.github.com/v3/activity/events/types/#pullrequestevent
 	
 	// Get project card ID
+	// Download card ID with actions/download-artifact in workflow and input to this action?
 	
 	// Move a project card
 	// https://developer.github.com/v3/projects/cards/#move-a-project-card
+	// https://octokit.github.io/rest.js/v17#projects-move-card
 }
 
 // most @actions toolkit packages have async methods
@@ -108,17 +184,17 @@ async function run() {
 		// Authenticated Octokit client
 		const octokit = new github.GitHub(myToken);
 	
-		const workflow = core.getInput('workflow')
-		switch (workflow) {
+		const step = core.getInput('step')
+		switch (step) {
 			case "issue2project":
 				issue2project(octokit);
 				break;
 			case "issue2pr":
 				issue2pr(octokit);
 				break;
-			case "pr2project": 
-				pr2project(octokit);
-				break;
+//			case "pr2project": 
+//				pr2project(octokit);
+//				break;
 			default:
 				break;
 		}

@@ -1,6 +1,9 @@
-name: Issue-to-PR
-description: 'Convert an issue to a pull request for a file containing the issue text.'
-
+name: grant-actions
+description: 'TODO'
+inputs:
+    step: # id of input
+        description: 'grant workflow step issue2project, issue2pr, or pr2project'
+        required: true
 
 runs:
   using: 'node12'
