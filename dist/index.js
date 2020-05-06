@@ -571,8 +571,10 @@ function issue2pr(octokit) {
     // https://help.github.com/en/actions/building-actions/creating-a-javascript-action
     // github.context.payload is the webhook payload, in this case the issues event payload?
     // https://developer.github.com/v3/activity/events/types/#issuesevent
+
     const issue = github.context.payload.issue;
-    console.log(`The event payload: ${issue}`);	
+    const payload = JSON.stringify(issue, undefined, 2);
+    console.log(`The issue payload: ${payload}`);	
     const owner = issue.repository.owner.login;
     const repo = issue.repository.name;
 
