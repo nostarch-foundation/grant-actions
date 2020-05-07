@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
+
 /*
 // When a new issue is opened, automatically add it to a GitHub project to facilitate review.
 function issue2project(octokit) {
@@ -75,7 +76,9 @@ function issue2pr(octokit) {
     // https://developer.github.com/v3/activity/events/types/#issuesevent
 
     const payload = JSON.stringify(github.context.payload, undefined, 2);
-    console.log(`The event payload: ${payload}`);	
+    console.log(`The event payload: ${payload}`);
+	const issue = JSON.stringify(github.context.payload.issue, undefined, 2);
+    console.log(`The issue payload: ${issue}`);	
     const owner = github.context.payload.issue.repository.owner.login;
     const repo = github.context.payload.issue.repository.name;
 
