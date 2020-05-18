@@ -75,14 +75,14 @@ function issue2pr(octokit) {
     // github.context.payload is the webhook payload, in this case the issues event payload?
     // https://developer.github.com/v3/activity/events/types/#issuesevent
 
-    const context = JSON.stringify(github.context, undefined, 2);
-    console.log(`The context: ${context}`);
-	const repository = JSON.stringify(github.context.payload.repository, undefined, 2);
-    console.log(`The repository: ${repository}`);	
+    //const context = JSON.stringify(github.context, undefined, 2);
+    //console.log(`The context: ${context}`);
+	//const repository = JSON.stringify(github.context.payload.repository, undefined, 2);
+    //console.log(`The repository: ${repository}`);	
     const owner = github.context.payload.repository.owner.login;
     const repo = github.context.payload.repository.name;
 
-    console.log("woo printf debugging");
+    //console.log("woo printf debugging");
 
     // get reference
     // https://developer.github.com/v3/git/refs/#get-a-single-reference
