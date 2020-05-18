@@ -87,13 +87,13 @@ async function issue2pr(octokit) {
     // get reference
     // https://developer.github.com/v3/git/refs/#get-a-single-reference
     // https://octokit.github.io/rest.js/v17#git-get-ref
-    var data = await octokit.git.getRef({
+    var resp = await octokit.git.getRef({
         owner: owner,
         repo: repo,
         ref: 'heads/master'
     });
-	console.log(data);
-	var currentsha = data.object.sha;
+	console.log(resp);
+	var currentsha = resp.data.object.sha;
 	console.log(currentsha);
 /*
     // create branch
