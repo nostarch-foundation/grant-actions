@@ -566,37 +566,34 @@ const cardId = card.id;
 }
  */
 // When an issue is given the ‘review’ label, convert it to a pull request.
-function issue2pr(octokit) {
+async function issue2pr(octokit) {
     // Trigger: issue is given 'review' label
     // issue context
     // https://help.github.com/en/actions/building-actions/creating-a-javascript-action
     // github.context.payload is the webhook payload, in this case the issues event payload?
     // https://developer.github.com/v3/activity/events/types/#issuesevent
 
-    const context = JSON.stringify(github.context, undefined, 2);
-    console.log(`The context: ${context}`);
-	const repository = JSON.stringify(github.context.payload.repository, undefined, 2);
-    console.log(`The repository: ${repository}`);	
+    //const context = JSON.stringify(github.context, undefined, 2);
+    //console.log(`The context: ${context}`);
+	//const repository = JSON.stringify(github.context.payload.repository, undefined, 2);
+    //console.log(`The repository: ${repository}`);	
     const owner = github.context.payload.repository.owner.login;
     const repo = github.context.payload.repository.name;
 
-    console.log("woo printf debugging");
+    //console.log("woo printf debugging");
 
     // get reference
     // https://developer.github.com/v3/git/refs/#get-a-single-reference
     // https://octokit.github.io/rest.js/v17#git-get-ref
-    var currentsha = 0;
-    octokit.git.getRef({
+    var data = await octokit.git.getRef({
         owner: owner,
         repo: repo,
         ref: 'heads/master'
-    })
-    .then(({
-            data
-        }) => {
-        currentsha = data.object.sha;
     });
-
+	console.log(data);
+	var currentsha = data.object.sha;
+	console.log(currentsha);
+/*
     // create branch
     // https://developer.github.com/v3/git/refs/#create-a-reference
     // https://octokit.github.io/rest.js/v17#git-create-ref
@@ -661,7 +658,7 @@ function issue2pr(octokit) {
         }) => {
         // handle data
         console.log(data);
-    });
+    });*/
 }
 
 // When an issue is converted to a pull request, move the associated card to next column.
@@ -680,7 +677,7 @@ function issue2pr(octokit) {
 // most @actions toolkit packages have async methods
 async function run() {
     try {
-        console.log("am I here?");
+        //console.log("am I here?");
         // This should be a token with access to your repository scoped in as a secret.
         // The YML workflow will need to set myToken with the GitHub Secret Token
         // myToken: ${{ secrets.GITHUB_TOKEN }}
@@ -696,7 +693,7 @@ async function run() {
                 //				issue2project(octokit);
                 //				break;
             case "issue2pr":
-                issue2pr(octokit);
+                await issue2pr(octokit);
                 break;
                 //			case "movePRcard":
                 //				movePRcard(octokit);
