@@ -107,7 +107,7 @@ async function issue2pr(octokit) {
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
     // https://octokit.github.io/rest.js/v17#repos-create-or-update-file
     var filename = "grant-" + issueUser + "-" + issueNum + ".md";
-    var path = "contents/grants/" + filename;
+    var path = "grants/" + filename;
     var commitMessage = "Request #" + issueNum + " by " + issueUser;
     var fileContents = Buffer.from(github.context.payload.issue.body).toString('base64');
     resp = await octokit.repos.createOrUpdateFile({
@@ -131,7 +131,7 @@ async function issue2pr(octokit) {
     resp = await octokit.pulls.create({
         owner: owner,
         repo: repo,
-        head: branchName,
+        head: owner + ":" + branchName,
         base: 'master',
         title: PRtitle,
         body: PRbody,
