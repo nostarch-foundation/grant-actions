@@ -137,7 +137,7 @@ async function issue2pr(octokit) {
         title: PRtitle,
         body: PRbody,
         maintainer_can_modify: true,
-        draft: true
+        draft: false
     });
 	console.log(resp); // TODO proper success check
 }
