@@ -8,7 +8,7 @@ inputs:
         description: 'grant workflow step issue2project, issue2pr, or movePRcard'
         required: true
     projectURL:
-        description: 'URL of grant applications repo'
+        description: 'URL of grant applications project'
         required: false
     columnName:
         description: 'Project column to move card to'

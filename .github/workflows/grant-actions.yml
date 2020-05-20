@@ -17,19 +17,19 @@ jobs:
               with:
                 myToken: ${{ secrets.GITHUB_TOKEN }}
                 step: 'issue2pr'
-#       - name: add-project-card-for-issue-to-applications-column
-#         uses: ./
-#         if: github.event_name == 'issues' && github.event.action == 'opened'
-#         with:
-#           myToken: ${{ secrets.GITHUB_TOKEN }}
-#           step: 'issue2project'
-#           projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
-#           columnName: 'Applications'
+            - name: add-project-card-for-issue-to-applications-column
+              uses: ./
+              if: github.event_name == 'issues' && github.event.action == 'opened'
+              with:
+                myToken: ${{ secrets.GITHUB_TOKEN }}
+                step: 'issuecard'
+                projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
+                columnName: 'Applications'
 #        - name: move-card-for-pr-to-review-column
 #          uses: ./
 #          if: github.event_name == 'pull_request' && github.event.action == 'opened'
 #          with:  
 #            myToken: ${{ secrets.GITHUB_TOKEN }}
-#            step: 'movePRcard'
+#            step: 'moveIssuecard'
 #            projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
 #            columnName: 'Review'

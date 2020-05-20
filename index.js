@@ -1,72 +1,55 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
 
-/*
 // When a new issue is opened, automatically add it to a GitHub project to facilitate review.
-function issue2project(octokit) {
-// Trigger: issue opened
-// issue context
-// https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
-// github.context.event is the webhook payload, in this case the issues event payload
-// https://developer.github.com/v3/activity/events/types/#issuesevent
-const issue = github.context.event.issue;
-const owner = issue.repository.owner.login;
-const repo = issue.repository.name;
+async function issue2project(octokit) {
+    // Trigger: issue opened
+    // issue context
+    // https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
+    // github.context.event is the webhook payload, in this case the issues event payload
+    // https://developer.github.com/v3/activity/events/types/#issuesevent
+    const owner = github.context.payload.repository.owner.login;
+    const repo = github.context.payload.repository.name;
 
-// Cribbing from github-actions-automate-projects
-// https://github.com/takanabe/github-actions-automate-projects/blob/master/main.go
+    // Cribbing from github-actions-automate-projects
+    // https://github.com/takanabe/github-actions-automate-projects/blob/master/main.go
 
-// Find project ID
-// https://octokit.github.io/rest.js/v17#projects-list-for-repo
-// https://developer.github.com/v3/projects/
-// https://octokit.github.io/rest.js/v17#pagination
-const projectURL = core.getInput('projectURL');
-var projectId = 0;
-for await (const response of octokit.paginate.iterator(
-octokit.projects.listForRepo,{ // TODO make this a simpler call, but comment that it won't work with more than 30 projects
-owner: owner,
-repo: repo,
-}
-)) {
-const { data : project } = response;
-if (project.html_url == projectURL) { // brittle?
-projectID = project.id;
-break;
-}
-}
-if (projectID == 0) { console.log("No such project"); return; }
+    // Find project ID
+    // https://octokit.github.io/rest.js/v17#projects-list-for-repo
+    // https://developer.github.com/v3/projects/
+    // https://octokit.github.io/rest.js/v17#pagination
+    const projectURL = core.getInput('projectURL');
+	// TODO works for <=30 projects, only gets first page of projects
+    var resp = await octokit.projects.listForRepo({
+		owner: owner,
+        repo: repo,
+    });
+	// TODO find project that matches supplied projectURL
 
-// Find column ID
-// https://octokit.github.io/rest.js/v17#projects-list-columns
-// https://developer.github.com/v3/projects/columns/#list-project-columns
-const colName = core.getInput('columnName');
-var colId = 0;
-for await (const response of octokit.paginate.iterator(
-octokit.projects.listColumns,{
-project_id: projectID,
-}
-)) {
-const { data : column } = response;
-if (column.name == colName) { // brittle?
-colId = column.id;
-break;
-}
-}
-if (colID == 0) { console.log("No such column"); return; }
+    // Find column ID
+    // https://octokit.github.io/rest.js/v17#projects-list-columns
+    // https://developer.github.com/v3/projects/columns/#list-project-columns
+    const colName = core.getInput('columnName');
+    var colId = 0;
+	// TODO works for <=30 project columns, only gets first page
+    resp = await octokit.projects.listColumns({
+            project_id: projectID,
+    });
+	// TODO find column that matches supplied colName
 
-// Create project card from issue
-// https://developer.github.com/v3/projects/cards/#create-a-project-card
-// https://octokit.github.io/rest.js/v17#projects-create-card
-const { data: card } = octokit.projects.createCard({
-column_id: colId,
-content_id: github.context.event.issue.id,
-content_type: 'Issue',
-});
+    // Create project card from issue
+    // https://developer.github.com/v3/projects/cards/#create-a-project-card
+    // https://octokit.github.io/rest.js/v17#projects-create-card
+    resp = await octokit.projects.createCard({
+        column_id: colId,
+        content_id: github.context.payload.issue.id,
+        content_type: 'Issue',
+    });
 
-// Store resulting card ID (will be needed for `New PR to Project Column`)
-const cardId = card.id;
+    // Store resulting card ID (will be needed for `New PR to Project Column`)
+    const cardId = card.id;
 }
- */
+
 // When an issue is given the ‘review’ label, convert it to a pull request.
 async function issue2pr(octokit) {
     // Trigger: issue is given 'review' label
@@ -85,9 +68,9 @@ async function issue2pr(octokit) {
         repo: repo,
         ref: 'heads/master'
     });
-	//console.log(resp);
-	var currentsha = resp.data.object.sha;
-	console.log(currentsha);
+    //console.log(resp);
+    var currentsha = resp.data.object.sha;
+    console.log(currentsha);
 
     // create branch
     // https://developer.github.com/v3/git/refs/#create-a-reference
@@ -101,7 +84,7 @@ async function issue2pr(octokit) {
         ref: 'refs/heads/' + branchName,
         sha: currentsha
     });
-	console.log(resp); // TODO proper success check (status == 201)
+    console.log(resp); // TODO proper success check (status == 201)
 
     // create file from issue body and commit it to the branch
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
@@ -113,7 +96,7 @@ async function issue2pr(octokit) {
     resp = await octokit.repos.createOrUpdateFile({
         owner: owner,
         repo: repo,
-		branch: branchName,
+        branch: branchName,
         path: path,
         message: commitMessage,
         content: fileContents,
@@ -122,7 +105,7 @@ async function issue2pr(octokit) {
         'author.name': 'GitHub Action',
         'author.email': 'action@github.com'
     });
-	console.log(resp); // TODO proper success check
+    console.log(resp); // TODO proper success check
 
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
@@ -139,11 +122,11 @@ async function issue2pr(octokit) {
         maintainer_can_modify: true,
         draft: false
     });
-	console.log(resp); // TODO proper success check
+    console.log(resp); // TODO proper success check
 }
 
 // When an issue is converted to a pull request, move the associated card to next column.
-//function movePRcard(octokit) {
+//function moveIssuecard(octokit) {
 // Trigger: PullRequestEvent opened
 // https://developer.github.com/v3/activity/events/types/#pullrequestevent
 
@@ -170,14 +153,14 @@ async function run() {
 
         const step = core.getInput('step')
             switch (step) {
-                //			case "issue2project":
-                //				await issue2project(octokit);
-                //				break;
+            case "issuecard":
+                await issueCard(octokit);
+                break;
             case "issue2pr":
                 await issue2pr(octokit);
                 break;
-                //			case "movePRcard":
-                //				await movePRcard(octokit);
+                //			case "moveIssuecard":
+                //				await moveIssueCard(octokit);
                 //				break;
             default:
                 break;
