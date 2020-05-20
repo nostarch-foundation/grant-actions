@@ -107,7 +107,7 @@ async function issue2pr(octokit) {
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
     // https://octokit.github.io/rest.js/v17#repos-create-or-update-file
     var filename = "grant-" + issueUser + "-" + issueNum + ".md";
-    var path = "https://api.github.com/repos/nostarch-foundation/wip-grant-submissions/contents/grants/" + filename;
+    var path = github.context.payload.repository_url + "/contents/grants/" + filename;
     var commitMessage = "Request #" + issueNum + " by " + issueUser;
     var fileContents = Buffer.from(github.context.payload.issue.body).toString('base64');
     resp = await octokit.repos.createOrUpdateFile({
@@ -121,7 +121,7 @@ async function issue2pr(octokit) {
         'author.name': 'GitHub Action',
         'author.email': 'action@github.com'
     });
-	console.log(resp.status); // TODO proper success check
+	console.log(resp); // TODO proper success check
 
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
@@ -138,7 +138,7 @@ async function issue2pr(octokit) {
         maintainer_can_modify: true,
         draft: true
     });
-	console.log(resp.status); // TODO proper success check
+	console.log(resp); // TODO proper success check
 }
 
 // When an issue is converted to a pull request, move the associated card to next column.
