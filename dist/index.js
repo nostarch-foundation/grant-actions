@@ -521,7 +521,7 @@ const repo = issue.repository.name;
 const projectURL = core.getInput('projectURL');
 var projectId = 0;
 for await (const response of octokit.paginate.iterator(
-octokit.projects.listForRepo,{
+octokit.projects.listForRepo,{ // TODO make this a simpler call, but comment that it won't work with more than 30 projects
 owner: owner,
 repo: repo,
 }
@@ -573,15 +573,8 @@ async function issue2pr(octokit) {
     // github.context.payload is the webhook payload, in this case the issues event payload?
     // https://developer.github.com/v3/activity/events/types/#issuesevent
 
-    //const context = JSON.stringify(github.context, undefined, 2);
-    //console.log(`The context: ${context}`);
-	//const repository = JSON.stringify(github.context.payload.repository, undefined, 2);
-    //console.log(`The repository: ${repository}`);	
     const owner = github.context.payload.repository.owner.login;
     const repo = github.context.payload.repository.name;
-
-    //console.log("woo printf debugging");
-
     // get reference
     // https://developer.github.com/v3/git/refs/#get-a-single-reference
     // https://octokit.github.io/rest.js/v17#git-get-ref
@@ -593,25 +586,20 @@ async function issue2pr(octokit) {
 	console.log(resp);
 	var currentsha = resp.data.object.sha;
 	console.log(currentsha);
-/*
+
     // create branch
     // https://developer.github.com/v3/git/refs/#create-a-reference
     // https://octokit.github.io/rest.js/v17#git-create-ref
     var issueUser = github.context.payload.issue.user.login;
     var issueNum = github.context.payload.issue.number;
     var branchName = "request-" + issueUser + "-" + issueNum;
-    octokit.git.createRef({
+    resp = await octokit.git.createRef({
         owner: owner,
         repo: repo,
         ref: 'refs/heads/' + branchName,
         sha: currentsha
-    })
-    .then(({
-            data
-        }) => {
-        // handle data
-        console.log(data);
     });
+	console.log(resp.status); // TODO proper success check
 
     // create file from issue body and commit it to the branch
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
@@ -620,7 +608,7 @@ async function issue2pr(octokit) {
     var path = "https://api.github.com/repos/nostarch-foundation/wip-grant-submissions/contents/grants/" + filename;
     var commitMessage = "Request #" + issueNum + " by " + issueUser;
     var fileContents = Buffer.from(github.context.payload.issue.body).toString('base64');
-    octokit.repos.createOrUpdateFile({
+    resp = await octokit.repos.createOrUpdateFile({
         owner: owner,
         repo: repo,
         path: path,
@@ -630,20 +618,15 @@ async function issue2pr(octokit) {
         'committer.email': 'action@github.com',
         'author.name': 'GitHub Action',
         'author.email': 'action@github.com'
-    })
-    .then(({
-            data
-        }) => {
-        // handle data
-        console.log(data);
     });
+	console.log(resp.status); // TODO proper success check
 
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
     var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + ")";
     var PRtitle = "[Review] Request by " + issueUser;
-    octokit.pulls.create({
+    resp = await octokit.pulls.create({
         owner: 'nostarch-foundation',
         repo: 'wip-grant-submissions',
         head: branchName,
@@ -652,13 +635,8 @@ async function issue2pr(octokit) {
         body: PRbody,
         maintainer_can_modify: true,
         draft: true
-    })
-    .then(({
-            data
-        }) => {
-        // handle data
-        console.log(data);
-    });*/
+    });
+	console.log(resp.status); // TODO proper success check
 }
 
 // When an issue is converted to a pull request, move the associated card to next column.
@@ -690,13 +668,13 @@ async function run() {
         const step = core.getInput('step')
             switch (step) {
                 //			case "issue2project":
-                //				issue2project(octokit);
+                //				await issue2project(octokit);
                 //				break;
             case "issue2pr":
                 await issue2pr(octokit);
                 break;
                 //			case "movePRcard":
-                //				movePRcard(octokit);
+                //				await movePRcard(octokit);
                 //				break;
             default:
                 break;
