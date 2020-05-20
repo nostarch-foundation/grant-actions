@@ -583,7 +583,7 @@ async function issue2pr(octokit) {
         repo: repo,
         ref: 'heads/master'
     });
-	console.log(resp);
+	//console.log(resp);
 	var currentsha = resp.data.object.sha;
 	console.log(currentsha);
 
@@ -599,7 +599,7 @@ async function issue2pr(octokit) {
         ref: 'refs/heads/' + branchName,
         sha: currentsha
     });
-	console.log(resp.status); // TODO proper success check
+	console.log(resp); // TODO proper success check (status == 201)
 
     // create file from issue body and commit it to the branch
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
