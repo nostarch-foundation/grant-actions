@@ -113,6 +113,7 @@ async function issue2pr(octokit) {
     resp = await octokit.repos.createOrUpdateFile({
         owner: owner,
         repo: repo,
+		branch: branchName,
         path: path,
         message: commitMessage,
         content: fileContents,
