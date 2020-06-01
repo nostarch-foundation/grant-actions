@@ -606,10 +606,8 @@ async function moveIssueCard(octokit){
 	// e.g. 'https://api.github.com/repos/nostarch-foundation/grant-actions/issues/8'
 	// github.context.payload.url is same URL from webhook payload on issue event
 	var cardID = 0;
-	console.log(github.context.payload);
 	for (const card of resp.data) {
-		console.log(card.content_url);
-		if (card.content_url == github.context.payload.url) {
+		if (card.content_url == github.context.payload.issue.url) {
 			cardID = card.id;
 			break;
 		}
