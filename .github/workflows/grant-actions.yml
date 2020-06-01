@@ -3,29 +3,32 @@ name: "grant-application-workflow-actions"
 on:
     issues:
         types: [opened, labeled]
-    pull_request:
-        types: [opened]
     
 jobs:
     grant-actions:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v1 # this is a step
-            - name: convert-issue-to-pr # this is another step
-              uses: ./
-              if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'Review'
-              with:
-                myToken: ${{ secrets.GITHUB_TOKEN }}
-                step: 'issue2pr'
-            - name: add-project-card-for-issue-to-applications-column
+            - uses: actions/checkout@v1
+            - name: add-project-card-for-issue
               uses: ./
               if: github.event_name == 'issues' && github.event.action == 'opened'
               with:
                 myToken: ${{ secrets.GITHUB_TOKEN }}
-                step: 'issuecard'
+                step: 'card-for-request'
                 projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
-                columnName: 'Applications'
-#        - name: move-card-for-pr-to-review-column
+                requestColumn: 'Applications'
+                reviewColumn: 'Review'
+            - name: move-request-to-review
+              uses: ./
+              if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'Review'
+              with:
+                myToken: ${{ secrets.GITHUB_TOKEN }}
+                step: 'request-to-review'
+                projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
+                requestColumn: 'Applications'
+                reviewColumn: 'Review'
+
+#        - name: move-issue-card-to-review-column
 #          uses: ./
 #          if: github.event_name == 'pull_request' && github.event.action == 'opened'
 #          with:  

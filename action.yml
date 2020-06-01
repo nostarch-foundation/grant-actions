@@ -2,17 +2,20 @@ name: grant-actions
 description: 'TODO'
 inputs:
     myToken:
-        description: 'github secrets token for octokit authentication'
+        description: 'Github secrets token for octokit authentication'
         required: true
-    step: # id of input
-        description: 'grant workflow step issue2project, issue2pr, or movePRcard'
+    step:
+        description: 'Grant workflow step: card-for-request or request-to-review'
         required: true
     projectURL:
         description: 'URL of grant applications project'
-        required: false
-    columnName:
-        description: 'Project column to move card to'
-        required: false
+        required: true
+    requestColumn:
+        description: 'Project column for new requests'
+        required: true
+    reviewColumn:
+        description: 'Project column for requests to review'
+        required: true
 
 runs:
   using: 'node12'
