@@ -2,7 +2,7 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 
 // When a new issue is opened, automatically add it to a GitHub project to facilitate review.
-async function issue2project(octokit) {
+async function issueCard(octokit) {
     // Trigger: issue opened
     // issue context
     // https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
@@ -17,37 +17,58 @@ async function issue2project(octokit) {
     // Find project ID
     // https://octokit.github.io/rest.js/v17#projects-list-for-repo
     // https://developer.github.com/v3/projects/
-    // https://octokit.github.io/rest.js/v17#pagination
-    const projectURL = core.getInput('projectURL');
 	// TODO works for <=30 projects, only gets first page of projects
     var resp = await octokit.projects.listForRepo({
 		owner: owner,
         repo: repo,
     });
-	// TODO find project that matches supplied projectURL
+	
+    const projectURL = core.getInput('projectURL');
+	var projectID = 0;
+	for (const project of resp.data) {
+		if (project.html_url == projectURL) {
+			projectID = project.id;
+			break;
+		}
+	}
+	if (projectID == 0) {
+		console.log("Project not found."); // TODO error handling
+		return;
+	}
 
     // Find column ID
     // https://octokit.github.io/rest.js/v17#projects-list-columns
     // https://developer.github.com/v3/projects/columns/#list-project-columns
-    const colName = core.getInput('columnName');
-    var colId = 0;
 	// TODO works for <=30 project columns, only gets first page
     resp = await octokit.projects.listColumns({
             project_id: projectID,
     });
-	// TODO find column that matches supplied colName
+
+    const colName = core.getInput('columnName');
+	var colID = 0;
+	for (const column of resp.data) {
+		if (column.name == colName) {
+			colID = column.id;
+			break;
+		}
+	}
+	if (colID == 0) {
+		console.log("Column not found."); // TODO error handling
+		return;
+	}
 
     // Create project card from issue
     // https://developer.github.com/v3/projects/cards/#create-a-project-card
     // https://octokit.github.io/rest.js/v17#projects-create-card
     resp = await octokit.projects.createCard({
-        column_id: colId,
+        column_id: colID,
         content_id: github.context.payload.issue.id,
         content_type: 'Issue',
     });
+	console.log(resp); // TODO proper check
 
     // Store resulting card ID (will be needed for `New PR to Project Column`)
-    const cardId = card.id;
+    //const cardId = resp.data.id;
 }
 
 // When an issue is given the ‘review’ label, convert it to a pull request.
