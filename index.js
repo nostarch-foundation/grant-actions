@@ -100,7 +100,7 @@ async function moveIssueCard(octokit){
 		archived_state: 'not_archived',
 	});
 	console.log("Cards list");
-	console.log(resp);
+	console.log(resp.status);
 	
 	// Get ID of card to move, by matching issue URLs.
 	// https://developer.github.com/v3/projects/cards/#get-a-project-card
@@ -108,7 +108,9 @@ async function moveIssueCard(octokit){
 	// e.g. 'https://api.github.com/repos/nostarch-foundation/grant-actions/issues/8'
 	// github.context.payload.url is same URL from webhook payload on issue event
 	var cardID = 0;
+	console.log(github.context.payload);
 	for (const card of resp.data) {
+		console.log(card.content_url);
 		if (card.content_url == github.context.payload.url) {
 			cardID = card.id;
 			break;
@@ -158,7 +160,7 @@ async function issue2pr(octokit) {
     });
     //console.log(resp);
     var currentsha = resp.data.object.sha;
-    console.log(currentsha);
+    //console.log(currentsha);
 
     // create branch
     // https://developer.github.com/v3/git/refs/#create-a-reference
@@ -172,7 +174,7 @@ async function issue2pr(octokit) {
         ref: 'refs/heads/' + branchName,
         sha: currentsha
     });
-    console.log(resp); // TODO proper success check (status == 201)
+    console.log(resp.status); // TODO proper success check (status == 201)
 
     // create file from issue body and commit it to the branch
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
