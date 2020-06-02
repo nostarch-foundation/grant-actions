@@ -134,7 +134,7 @@ async function moveIssueCard(octokit){
 		column_id: colID,
 	});
 	console.log("Moved card");
-	console.log(resp);
+	console.log(resp.status);
 }
 
 // When an issue is given the ‘review’ label, convert it to a pull request.
@@ -198,7 +198,7 @@ async function issue2pr(octokit) {
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
-    var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + ")";
+    var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + "), resolves #" + issueNum;
     var PRtitle = "[Review] Request by " + issueUser;
     resp = await octokit.pulls.create({
         owner: owner,
