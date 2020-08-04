@@ -702,7 +702,7 @@ async function issue2pr(octokit) {
         owner: owner,
         repo: repo,
 		issue: issueNum,
-        head: owner + ":" + branchName,
+        head: branchName,
         base: 'master',
         //title: PRtitle,
         maintainer_can_modify: true,
