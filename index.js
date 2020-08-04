@@ -198,17 +198,17 @@ async function issue2pr(octokit) {
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
-    var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + "), resolves #" + issueNum;
-    var PRtitle = "[Review] Request by " + issueUser;
+    //var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + "), resolves #" + issueNum;
+    //var PRtitle = "[Review] Request by " + issueUser;
     resp = await octokit.pulls.create({
         owner: owner,
         repo: repo,
+		isse: issueNum,
         head: owner + ":" + branchName,
         base: 'master',
-        title: PRtitle,
-        body: PRbody,
+        //title: PRtitle,
         maintainer_can_modify: true,
-        draft: false
+        draft: true
     });
     console.log(resp.status); // TODO proper success check
 }
