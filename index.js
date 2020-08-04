@@ -203,7 +203,7 @@ async function issue2pr(octokit) {
     resp = await octokit.pulls.create({
         owner: owner,
         repo: repo,
-		isse: issueNum,
+		issue: issueNum,
         head: owner + ":" + branchName,
         base: 'master',
         //title: PRtitle,
