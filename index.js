@@ -26,7 +26,8 @@ async function getProjectID(octokit) {
 // Returns the ID of the column specified by the columnName,
 // in the project specified by the projectURL action input.
 // If no such column exists, returns 0.
-async function getColumnID(octokit, columnName) {
+async function getColumnIDByName(octokit, inputColumnName) {
+	const columnName = core.getInpud(inputColumnName);
 	var projectID = await getProjectID(octokit);
 	if (projectID == 0) {
 		console.log("Project not found."); // TODO error handling
@@ -61,8 +62,7 @@ async function createIssueCard(octokit) {
     // https://github.com/takanabe/github-actions-automate-projects/blob/master/main.go
 
     // Find ID of column to put card in, using projectURL and requestColumn action inputs.	
-	const colName = core.getInput('requestColumn');
-	var colID = await getColumnID(octokit, colName);
+	var colID = await getColumnIDByName(octokit, 'requestColumn');
 	if (colID == 0) {
 		console.log("Column not found."); // TODO error handling
 		return;
@@ -85,8 +85,7 @@ async function createIssueCard(octokit) {
 async function moveIssueCard(octokit){
 	console.log("moveIssueCard");
 	// Find ID of column the card is currently in, using requestColumn action input.
-	const requestCol = core.getInput('requestColumn');
-	var colID = await getColumnID(octokit, requestCol);
+	var colID = await getColumnIDByName(octokit, 'requestColumn');
 	if (colID == 0) {
 		console.log("Column not found."); // TODO error handling
 		return;
@@ -120,8 +119,7 @@ async function moveIssueCard(octokit){
 	}
 	
     // Find ID of column to put card in.
-	const reviewCol = core.getInput('reviewColumn');
-	colID = await getColumnID(octokit, reviewCol);
+	colID = await getColumnIDByName(octokit, 'reviewColumn');
 	if (colID == 0) {
 		console.log("Column not found."); // TODO error handling
 		return;
