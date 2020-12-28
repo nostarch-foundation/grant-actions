@@ -128,13 +128,22 @@ async function moveIssueCard(octokit){
 	}
     
 	// https://octokit.github.io/rest.js/v17#projects-move-card
-    resp = await octokit.projects.moveCard({
-		card_id: cardID,
-		position: "top",
-		column_id: colID,
-	});
-	console.log("Moved card");
-	console.log(resp.status);
+    //resp = await octokit.projects.moveCard({
+	//	card_id: cardID,
+	//	position: "top",
+	//	column_id: colID,
+	//});
+	//console.log("Moved card");
+	//console.log(resp.status);
+	
+	console.log("replacing issue card ID " + issueCardID + " with a new PR card for PR #" + prNum);
+
+	await octokit.projects.deleteCard(card_id: issueCardID);
+	console.log('deleted card ' + issueCardID);
+
+	const colID = await getColumnID(octokit, core.getInput('requestColumn'));
+	await octokit.projects.createCard(column_id: colID, content_id: prNum, content_type: 'pull_request'); // TODO is this the right content_type?
+	console.log('created card ' + prNum);
 }
 
 // When an issue is given the ‘review’ label, convert it to a pull request.
@@ -172,7 +181,7 @@ async function issue2pr(octokit) {
         ref: 'refs/heads/' + branchName,
         sha: currentsha
     });
-    console.log(resp.status); // TODO proper success check (status == 201)
+    console.log(resp.status == 201 ? 'successfully created branch' : 'error: ' + resp.status ); // TODO proper success check (status == 201)
 
     // create file from issue body and commit it to the branch
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
@@ -226,17 +235,17 @@ async function run() {
         const octokit = new github.GitHub(myToken);
 
         const step = core.getInput('step')
-            switch (step) {
-            case "card-for-request":
-                await createIssueCard(octokit);
-                break;
-            case "request-to-review":
-                await issue2pr(octokit);
-				await moveIssueCard(octokit);
-                break;
-            default:
-                break;
-            }
+        switch (step) {
+        case "card-for-request":
+            await createIssueCard(octokit);
+            break;
+        case "request-to-review":
+            await issue2pr(octokit);
+			await moveIssueCard(octokit);
+            break;
+        default:
+            break;
+        }
     } catch (error) {
         core.setFailed(error.message);
     }

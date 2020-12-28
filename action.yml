@@ -1,5 +1,7 @@
 name: grant-actions
-description: 'TODO'
+description: >
+  One Action to Rule Them All; conditionally performs different (sub-)actions
+  depending on the value of the "step" parameter.
 inputs:
     myToken:
         description: 'Github secrets token for octokit authentication'
@@ -8,7 +10,7 @@ inputs:
         description: 'Grant workflow step: card-for-request or request-to-review'
         required: true
     projectURL:
-        description: 'URL of grant applications project'
+        description: 'URL of grant application''s project'
         required: true
     requestColumn:
         description: 'Project column for new requests'
