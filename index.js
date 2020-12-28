@@ -4,54 +4,54 @@ const github = require('@actions/github');
 // Returns the ID of the project specified by the projectURL action parameter.
 // If no such project exists, returns 0.
 async function getProjectID(octokit) {
-	// Find project ID
+    // Find project ID
     // https://octokit.github.io/rest.js/v17#projects-list-for-repo
     // https://developer.github.com/v3/projects/
-	// TODO works for <=30 projects, only gets first page of projects
+    // TODO works for <=30 projects, only gets first page of projects
 
-	var resp = await octokit.projects.listForRepo({
-		owner: github.context.payload.repository.owner.login,
+    var resp = await octokit.projects.listForRepo({
+        owner: github.context.payload.repository.owner.login,
         repo: github.context.payload.repository.name,
     });
-	
+    
     const projectURL = core.getInput('projectURL');
-	for (const project of resp.data) {
-		if (project.html_url == projectURL) {
-			return project.id;
-		}
-	}
-	return 0;
+    for (const project of resp.data) {
+        if (project.html_url == projectURL) {
+            return project.id;
+        }
+    }
+    return 0;
 }
 
 // Returns the ID of the column specified by the columnName,
 // in the project specified by the projectURL action input.
 // If no such column exists, returns 0.
 async function getColumnIDByName(octokit, inputColumnName) {
-	const columnName = core.getInpud(inputColumnName);
-	var projectID = await getProjectID(octokit);
-	if (projectID == 0) {
-		console.log("Project not found."); // TODO error handling
-		return;
-	}	
-	
+    const columnName = core.getInput(inputColumnName);
+    var projectID = await getProjectID(octokit);
+    if (projectID == 0) {
+        console.log("Project not found."); // TODO error handling
+        return;
+    }    
+    
     // https://octokit.github.io/rest.js/v17#projects-list-columns
     // https://developer.github.com/v3/projects/columns/#list-project-columns
-	// TODO works for <=30 project columns, only gets first page	
+    // TODO works for <=30 project columns, only gets first page    
     var resp = await octokit.projects.listColumns({
             project_id: projectID,
     });
 
-	for (const column of resp.data) {
-		if (column.name == columnName) {
-			return column.id;
-		}
-	}
-	return 0;
+    for (const column of resp.data) {
+        if (column.name == columnName) {
+            return column.id;
+        }
+    }
+    return 0;
 }
 
 // When a new issue is opened, automatically add it to a GitHub project to facilitate review.
 async function createIssueCard(octokit) {
-	console.log("createIssueCard");
+    console.log("createIssueCard");
     // Trigger: issue opened
     // issue context
     // https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions
@@ -61,12 +61,12 @@ async function createIssueCard(octokit) {
     // Cribbing from github-actions-automate-projects
     // https://github.com/takanabe/github-actions-automate-projects/blob/master/main.go
 
-    // Find ID of column to put card in, using projectURL and requestColumn action inputs.	
-	var colID = await getColumnIDByName(octokit, 'requestColumn');
-	if (colID == 0) {
-		console.log("Column not found."); // TODO error handling
-		return;
-	}
+    // Find ID of column to put card in, using projectURL and requestColumn action inputs.    
+    var colID = await getColumnIDByName(octokit, 'requestColumn');
+    if (colID == 0) {
+        console.log("Column not found."); // TODO error handling
+        return;
+    }
 
     // Create project card from issue
     // https://developer.github.com/v3/projects/cards/#create-a-project-card
@@ -76,63 +76,63 @@ async function createIssueCard(octokit) {
         content_id: github.context.payload.issue.id,
         content_type: 'Issue',
     });
-	console.log(resp.status); // TODO proper check
-	// resp.data.content_url == url of associated issue
+    console.log(resp.status); // TODO proper check
+    // resp.data.content_url == url of associated issue
     // e.g. content_url: 'https://api.github.com/repos/nostarch-foundation/grant-actions/issues/8'
 }
 
 // When an issue is given the 'Review' label, move the issue project card to the 'Review' column.
 async function moveIssueCard(octokit){
-	console.log("moveIssueCard");
-	// Find ID of column the card is currently in, using requestColumn action input.
-	var colID = await getColumnIDByName(octokit, 'requestColumn');
-	if (colID == 0) {
-		console.log("Column not found."); // TODO error handling
-		return;
-	}
-	
-	// List cards in that column.
-	// https://octokit.github.io/rest.js/v17#projects-list-cards
-	// TODO only gets first page, paginate to get more than 30 cards
-	var resp = await octokit.projects.listCards({
-		column_id: colID,
-		archived_state: 'not_archived',
-	});
-	console.log("Cards list");
-	console.log(resp.status);
-	
-	// Get ID of card to move, by matching issue URLs.
-	// https://developer.github.com/v3/projects/cards/#get-a-project-card
-	// resp.data.[].content_url is the URL of the issue associated with the card
-	// e.g. 'https://api.github.com/repos/nostarch-foundation/grant-actions/issues/8'
-	// github.context.payload.url is same URL from webhook payload on issue event
-	var cardID = 0;
-	for (const card of resp.data) {
-		if (card.content_url == github.context.payload.issue.url) {
-			cardID = card.id;
-			break;
-		}
-	}
-	if (cardID == 0) {
-		console.log("Card not found.");
-		return; // TODO error handling
-	}
-	
-    // Find ID of column to put card in.
-	colID = await getColumnIDByName(octokit, 'reviewColumn');
-	if (colID == 0) {
-		console.log("Column not found."); // TODO error handling
-		return;
-	}
+    console.log("moveIssueCard");
+    // Find ID of column the card is currently in, using requestColumn action input.
+    var colID = await getColumnIDByName(octokit, 'requestColumn');
+    if (colID == 0) {
+        console.log("Column not found."); // TODO error handling
+        return;
+    }
     
-	// https://octokit.github.io/rest.js/v17#projects-move-card
+    // List cards in that column.
+    // https://octokit.github.io/rest.js/v17#projects-list-cards
+    // TODO only gets first page, paginate to get more than 30 cards
+    var resp = await octokit.projects.listCards({
+        column_id: colID,
+        archived_state: 'not_archived',
+    });
+    console.log("Cards list");
+    console.log(resp.status);
+    
+    // Get ID of card to move, by matching issue URLs.
+    // https://developer.github.com/v3/projects/cards/#get-a-project-card
+    // resp.data.[].content_url is the URL of the issue associated with the card
+    // e.g. 'https://api.github.com/repos/nostarch-foundation/grant-actions/issues/8'
+    // github.context.payload.url is same URL from webhook payload on issue event
+    var cardID = 0;
+    for (const card of resp.data) {
+        if (card.content_url == github.context.payload.issue.url) {
+            cardID = card.id;
+            break;
+        }
+    }
+    if (cardID == 0) {
+        console.log("Card not found.");
+        return; // TODO error handling
+    }
+    
+    // Find ID of column to put card in.
+    colID = await getColumnIDByName(octokit, 'reviewColumn');
+    if (colID == 0) {
+        console.log("Column not found."); // TODO error handling
+        return;
+    }
+    
+    // https://octokit.github.io/rest.js/v17#projects-move-card
     resp = await octokit.projects.moveCard({
-		card_id: cardID,
-		position: "top",
-		column_id: colID,
-	});
-	console.log("Moved card");
-	console.log(resp.status);
+        card_id: cardID,
+        position: "top",
+        column_id: colID,
+    });
+    console.log("Moved card");
+    console.log(resp.status);
 }
 
 // When an issue is given the ‘review’ label, convert it to a pull request.
@@ -142,7 +142,7 @@ async function issue2pr(octokit) {
     // https://help.github.com/en/actions/building-actions/creating-a-javascript-action
     // github.context.payload is the webhook payload, in this case the issues event payload?
     // https://developer.github.com/v3/activity/events/types/#issuesevent
-	console.log("issue2pr");
+    console.log("issue2pr");
 
     const owner = github.context.payload.repository.owner.login;
     const repo = github.context.payload.repository.name;
@@ -201,7 +201,7 @@ async function issue2pr(octokit) {
     resp = await octokit.pulls.create({
         owner: owner,
         repo: repo,
-		issue: issueNum,
+        issue: issueNum,
         head: branchName,
         base: 'master',
         //title: PRtitle,
@@ -230,7 +230,7 @@ async function run() {
             break;
         case "request-to-review":
             await issue2pr(octokit);
-			await moveIssueCard(octokit);
+            await moveIssueCard(octokit);
             break;
         default:
             break;
