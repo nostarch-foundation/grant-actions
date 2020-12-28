@@ -226,17 +226,17 @@ async function run() {
         const octokit = new github.GitHub(myToken);
 
         const step = core.getInput('step')
-            switch (step) {
-            case "card-for-request":
-                await createIssueCard(octokit);
-                break;
-            case "request-to-review":
-                await issue2pr(octokit);
-				await moveIssueCard(octokit);
-                break;
-            default:
-                break;
-            }
+        switch (step) {
+        case "card-for-request":
+            await createIssueCard(octokit);
+            break;
+        case "request-to-review":
+            await issue2pr(octokit);
+			await moveIssueCard(octokit);
+            break;
+        default:
+            break;
+        }
     } catch (error) {
         core.setFailed(error.message);
     }
