@@ -150,7 +150,7 @@ async function issue2pr(octokit) {
         repo: repo,
         ref: 'heads/master'
     });
-    //console.log(resp);
+    console.log(resp);
     var currentsha = resp.data.object.sha;
     //console.log(currentsha);
 
@@ -165,7 +165,7 @@ async function issue2pr(octokit) {
         repo: repo,
         ref: 'refs/heads/' + branchName,
         sha: currentsha
-    });
+    }); // TODO if branch already exists, action fails. Tolerate already-existant branch ref.
     console.log(resp.status); // TODO proper success check (status == 201)
 
     // create file from issue body and commit it to the branch
@@ -193,14 +193,13 @@ async function issue2pr(octokit) {
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
     //var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + "), resolves #" + issueNum;
-    //var PRtitle = "[Review] Request by " + issueUser;
     resp = await octokit.pulls.create({
         owner: owner,
         repo: repo,
         issue: issueNum,
         head: branchName,
         base: 'master',
-        //title: PRtitle,
+        title: "[Review] Request by " + issueUser;
         maintainer_can_modify: true,
         draft: true
     });
