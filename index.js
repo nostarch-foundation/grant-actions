@@ -199,7 +199,7 @@ async function issue2pr(octokit) {
         issue: issueNum,
         head: branchName,
         base: 'master',
-        title: "[Review] Request by " + issueUser;
+        title: "[Review] Request by " + issueUser,
         maintainer_can_modify: true,
         draft: true
     });
