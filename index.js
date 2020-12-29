@@ -30,8 +30,7 @@ async function getColumnIDByName(octokit, inputColumnName) {
     const columnName = core.getInput(inputColumnName);
     var projectID = await getProjectID(octokit);
     if (projectID == 0) {
-        console.log("Project not found."); // TODO error handling
-        return;
+        throw "Project not found.";
     }    
     
     // https://octokit.github.io/rest.js/v17#projects-list-columns
@@ -64,8 +63,7 @@ async function createIssueCard(octokit) {
     // Find ID of column to put card in, using projectURL and requestColumn action inputs.    
     var colID = await getColumnIDByName(octokit, 'requestColumn');
     if (colID == 0) {
-        console.log("Column not found."); // TODO error handling
-        return;
+        throw "Column not found.";
     }
 
     // Create project card from issue
@@ -87,8 +85,7 @@ async function moveIssueCard(octokit){
     // Find ID of column the card is currently in, using requestColumn action input.
     var colID = await getColumnIDByName(octokit, 'requestColumn');
     if (colID == 0) {
-        console.log("Column not found."); // TODO error handling
-        return;
+        throw "Column not found.";
     }
     
     // List cards in that column.
@@ -121,8 +118,7 @@ async function moveIssueCard(octokit){
     // Find ID of column to put card in.
     colID = await getColumnIDByName(octokit, 'reviewColumn');
     if (colID == 0) {
-        console.log("Column not found."); // TODO error handling
-        return;
+        throw "Column not found.";
     }
     
     // https://octokit.github.io/rest.js/v17#projects-move-card
