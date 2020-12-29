@@ -160,13 +160,18 @@ async function issue2pr(octokit) {
     var issueUser = github.context.payload.issue.user.login;
     var issueNum = github.context.payload.issue.number;
     var branchName = "request-" + issueUser + "-" + issueNum;
-    resp = await octokit.git.createRef({
-        owner: owner,
-        repo: repo,
-        ref: 'refs/heads/' + branchName,
-        sha: currentsha
-    }); // TODO if branch already exists, action fails. Tolerate already-existant branch ref.
-    console.log(resp.status); // TODO proper success check (status == 201)
+    try {
+        resp = await octokit.git.createRef({
+            owner: owner,
+            repo: repo,
+            ref: 'refs/heads/' + branchName,
+            sha: currentsha
+        }); // TODO if branch already exists, action fails. Tolerate already-existant branch ref.
+        console.log(resp.status); // TODO proper success check (status == 201)
+    } catch (e) {
+        console.log(e.status);
+        console.log(e);
+    }
 
     // create file from issue body and commit it to the branch
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
