@@ -160,13 +160,17 @@ async function issue2pr(octokit) {
     var issueUser = github.context.payload.issue.user.login;
     var issueNum = github.context.payload.issue.number;
     var branchName = "request-" + issueUser + "-" + issueNum;
-    resp = await octokit.git.createRef({
-        owner: owner,
-        repo: repo,
-        ref: 'refs/heads/' + branchName,
-        sha: currentsha
-    }).catch((e) => {console.log(e);}); // TODO if branch already exists, action fails. Tolerate already-existant branch ref.
-    console.log(resp.status); // TODO proper success check (status == 201)
+    try {
+        resp = await octokit.git.createRef({
+            owner: owner,
+            repo: repo,
+            ref: 'refs/heads/' + branchName,
+            sha: currentsha
+        });
+        console.log(resp.status);
+    } catch(e) {
+        console.log("caught exception: " + e);
+    } // TODO if branch already exists, action fails. Tolerate already-existant branch ref.
 
     // create file from issue body and commit it to the branch
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
@@ -175,6 +179,7 @@ async function issue2pr(octokit) {
     var path = "grants/" + filename;
     var commitMessage = "Request #" + issueNum + " by " + issueUser;
     var fileContents = Buffer.from(github.context.payload.issue.body).toString('base64');
+    console.log("creating file from issue");
     resp = await octokit.repos.createOrUpdateFile({
         owner: owner,
         repo: repo,
@@ -231,7 +236,7 @@ async function run() {
             break;
         }
     } catch (error) {
-        core.setFailed(error.message);
+        core.setFailed(error);
     }
 }
 
