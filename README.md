@@ -1,21 +1,9 @@
+# No Starch Press Grant Applications Automation Actions
 
-<p align="center">
-  <a href="https://github.com/actions/javascript-action/actions"><img alt="javscript-action status" src="https://github.com/actions/javascript-action/workflows/units-test/badge.svg"></a>
-</p>
+This repository contains GitHub Actions to automate parts of No Starch Press's
+grant applications process.
 
-# Create a JavaScript Action
-
-Use this template to bootstrap the creation of a JavaScript action.:rocket:
-
-This template includes tests, linting, a validation workflow, publishing, and versioning guidance.  
-
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
-
-## Create an action from this template
-
-Click the `Use this Template` and provide the new repo details for your action
-
-## Code in Master
+## Setup
 
 Install the dependencies  
 ```bash
@@ -34,17 +22,17 @@ $ npm test
 ...
 ```
 
-## Change action.yml
+## Development
 
-The action.yml contains defines the inputs and output for your action.
+The root of any GitHub Actions deployment is the `action.yml` file.
+`action.yml` contains defines the inputs and output for your action. The
+`index.js` file currently contains the bulk of relevant JavaScript code.
 
-Update the action.yml with your name, description, inputs and outputs for your action.
+See the
+[documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions).
 
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
-
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
+Most toolkit and CI/CD operations involve async operations so the action is run
+in an async function.
 
 ```javascript
 const core = require('@actions/core');
@@ -62,53 +50,43 @@ async function run() {
 run()
 ```
 
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
+See the [toolkit
+documentation](https://github.com/actions/toolkit/blob/master/README.md#packages)
+for the various packages.
 
-## Package for distribution
+## Release
 
-GitHub Actions will run the entry point from the action.yml. Packaging assembles the code into one file that can be checked in to Git, enabling fast and reliable execution and preventing the need to check in node_modules.
+GitHub Actions will run the entry point from the action.yml. Packaging
+assembles the code into one file that can be checked in to Git, enabling fast
+and reliable execution and preventing the need to check in node_modules.
 
-Actions are run from GitHub repos.  Packaging the action will create a packaged action in the dist folder.
+Actions are run from GitHub repos. Packaging the action will create a packaged
+action in the `dist/` folder.
 
-Run package
+Run package:
 
 ```bash
 npm run package
 ```
 
-Since the packaged index.js is run from the dist folder.
+GitHub Actions will run code checked in to the `dist/` folder, so push that
+folder to GitHub to release:
 
 ```bash
 git add dist
+git commit
+git push
 ```
 
-## Create a release branch
+## Testing
 
-Users shouldn't consume the action from master since that would be latest code and actions can break compatibility between major versions.
+GitHub Actions run in a unique environment managed by GitHub, so there is no
+easy way to run code locally. This limits testing severely, and forces us to
+"test in prod". To see the result of an action, see the [actions
+tab](https://github.com/actions/grant-actions/actions).
 
-Checkin to the v1 release branch
-
-```bash
-$ git checkout -b v1
-$ git commit -a -m "v1 release"
-```
-
-```bash
-$ git push origin v1
-```
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Usage
-
-You can now consume the action by referencing the v1 branch
-
-```yaml
-uses: actions/javascript-action@v1
-with:
-  milliseconds: 1000
-```
-
-See the [actions tab](https://github.com/actions/javascript-action/actions) for runs of this action! :rocket:
+The [`act`](https://github.com/nektos/act) project offers a local lookalike
+environment, though it doesn't yet have 100% feature parity, and may give
+subtly different results. Nonetheless, this would be a huge improvement over
+the current development workflow. If you do get act working in this project,
+please leave instructions here!
