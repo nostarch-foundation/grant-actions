@@ -138,7 +138,7 @@ async function issue2pr(octokit) {
     // https://help.github.com/en/actions/building-actions/creating-a-javascript-action
     // github.context.payload is the webhook payload, in this case the issues event payload?
     // https://developer.github.com/v3/activity/events/types/#issuesevent
-    console.log("issue2pr");
+    console.log("issue2prDEBUG");
 
     const owner = github.context.payload.repository.owner.login;
     const repo = github.context.payload.repository.name;
