@@ -159,19 +159,34 @@ async function issue2pr(octokit) {
     var issueUser = github.context.payload.issue.user.login;
     var issueNum = github.context.payload.issue.number;
     var branchName = "request-" + issueUser + "-" + issueNum;
+    var sha = '';
+    var req = {
+        owner: owner,
+        repo: repo,
+        ref: 'refs/heads/' + branchName,
+        sha: currentsha
+    };
+    console.log('Creating branch:');
+    console.log(req);
     try {
-        resp = await octokit.git.createRef({
-            owner: owner,
-            repo: repo,
-            ref: 'refs/heads/' + branchName,
-            sha: currentsha
-        });
+        resp = await octokit.git.createRef(req);
         console.log(resp.status);
     } catch(e) {
-        console.log(e);
         console.log("caught exception: " + e);
-        if (!e.message.includes("already exists")) {
-            // Tolerate already-exists errors for idempotence.
+        console.log(e);
+        if (e.message.includes("already exists")) {
+            // Branch already exists. 
+            // Get the hash of the file we're about to create, if it exists.
+            req = {
+                // TODO
+            };
+            resp = await octokit.git.getFile(req);
+            console.log("fetched file:");
+            console.log(resp);
+            sha = resp.sha;
+            console.log("continuing...");
+        } else {
+            console.log("rethrowing...");
             throw e;
         }
     }
@@ -194,13 +209,16 @@ async function issue2pr(octokit) {
         'committer.name': 'GitHub Action',
         'committer.email': 'action@github.com',
         'author.name': 'GitHub Action',
-        'author.email': 'action@github.com'
+        'author.email': 'action@github.com',
+        sha: sha
     };
-    console.log('CreateOrUpdateFile: ' + req);
+    console.log('CreateOrUpdateFile:');
+    console.log(req);
     try {
         resp = await octokit.repos.createOrUpdateFile(req);
     } catch (e) {
         console.log('saw exception: ' + e);
+        console.log(e);
         console.log('rethrowing...');
         throw e;
     }
@@ -210,7 +228,6 @@ async function issue2pr(octokit) {
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
     //var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + "), resolves #" + issueNum;
-    console.log('Creating pull: ' + req);
     req = {
         owner: owner,
         repo: repo,
@@ -221,10 +238,12 @@ async function issue2pr(octokit) {
         maintainer_can_modify: true,
         draft: true
     };
+    console.log('Creating pull: ' + req);
     try {
         resp = await octokit.pulls.create(req);
     } catch (e) {
         console.log('saw exception: ' + e);
+        console.log(e);
         console.log('rethrowing...');
         throw e;
     }
