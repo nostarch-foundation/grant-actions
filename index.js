@@ -111,8 +111,7 @@ async function moveIssueCard(octokit){
         }
     }
     if (cardID == 0) {
-        console.log("Card not found.");
-        return; // TODO error handling
+        throw "Card " + github.context.payload.issue.url + " not found.";
     }
     
     // Find ID of column to put card in.
@@ -127,7 +126,7 @@ async function moveIssueCard(octokit){
         position: "top",
         column_id: colID,
     });
-    console.log("Moved card");
+    console.log("Moved card " + github.context.payload.issue.url);
     console.log(resp.status);
 }
 
@@ -138,7 +137,7 @@ async function issue2pr(octokit) {
     // https://help.github.com/en/actions/building-actions/creating-a-javascript-action
     // github.context.payload is the webhook payload, in this case the issues event payload?
     // https://developer.github.com/v3/activity/events/types/#issuesevent
-    console.log("issue2prDEBUG");
+    console.log("issue2pr");
 
     const owner = github.context.payload.repository.owner.login;
     const repo = github.context.payload.repository.name;
@@ -169,8 +168,13 @@ async function issue2pr(octokit) {
         });
         console.log(resp.status);
     } catch(e) {
+        console.log(e);
         console.log("caught exception: " + e);
-    } // TODO if branch already exists, action fails. Tolerate already-existant branch ref.
+        if (!e.message.includes("already exists")) {
+            // Tolerate already-exists errors for idempotence.
+            throw e;
+        }
+    }
 
     // create file from issue body and commit it to the branch
     // https://developer.github.com/v3/repos/contents/#create-or-update-a-file
@@ -179,8 +183,8 @@ async function issue2pr(octokit) {
     var path = "grants/" + filename;
     var commitMessage = "Request #" + issueNum + " by " + issueUser;
     var fileContents = Buffer.from(github.context.payload.issue.body).toString('base64');
-    console.log("creating file from issue");
-    resp = await octokit.repos.createOrUpdateFile({
+    console.log("creating file from issue #" + issueNum);
+    req = {
         owner: owner,
         repo: repo,
         branch: branchName,
@@ -191,14 +195,23 @@ async function issue2pr(octokit) {
         'committer.email': 'action@github.com',
         'author.name': 'GitHub Action',
         'author.email': 'action@github.com'
-    });
-    console.log(resp.status); // TODO proper success check
+    };
+    console.log('CreateOrUpdateFile: ' + req);
+    try {
+        resp = await octokit.repos.createOrUpdateFile(req);
+    } catch (e) {
+        console.log('saw exception: ' + e);
+        console.log('rethrowing...');
+        throw e;
+    }
+    console.log(resp.status);
 
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
     //var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + "), resolves #" + issueNum;
-    resp = await octokit.pulls.create({
+    console.log('Creating pull: ' + req);
+    req = {
         owner: owner,
         repo: repo,
         issue: issueNum,
@@ -207,7 +220,14 @@ async function issue2pr(octokit) {
         title: "[Review] Request by " + issueUser,
         maintainer_can_modify: true,
         draft: true
-    });
+    };
+    try {
+        resp = await octokit.pulls.create(req);
+    } catch (e) {
+        console.log('saw exception: ' + e);
+        console.log('rethrowing...');
+        throw e;
+    }
     console.log(resp.status); // TODO proper success check
 }
 
