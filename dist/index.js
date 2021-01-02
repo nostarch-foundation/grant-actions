@@ -2039,6 +2039,7 @@ exports.issueCommand = issueCommand;
 
 const core = __webpack_require__(470);
 const github = __webpack_require__(469);
+const crypto = __webpack_require__(417);
 
 // Returns the ID of the project specified by the projectURL action parameter.
 // If no such project exists, returns 0.
@@ -5302,6 +5303,13 @@ function Octokit(plugins, options) {
 /***/ (function(module) {
 
 module.exports = require("stream");
+
+/***/ }),
+
+/***/ 417:
+/***/ (function(module) {
+
+module.exports = require("crypto");
 
 /***/ }),
 
