@@ -80,8 +80,9 @@ async function createIssueCard(octokit) {
     // e.g. content_url: 'https://api.github.com/repos/nostarch-foundation/grant-actions/issues/8'
 }
 
-// When an issue is given the 'Review' label, move the issue project card to the 'Review' column.
-async function moveIssueCard(octokit){
+// When an issue is given the 'Review' label, hide the issue card and add a PR
+// card to the 'Review' column.
+async function replaceIssueCardWithPRCard(octokit, prNum){
     console.log("moveIssueCard");
     // Find ID of column the card is currently in, using requestColumn action input.
     var colID = await getColumnIDByName(octokit, 'requestColumn');
@@ -270,7 +271,10 @@ async function issue2pr(octokit) {
         console.log('rethrowing...');
         throw e;
     }
+    console.log(resp);
     console.log(resp.status);
+
+    await replaceIssueCardWithPRCard(octokit, resp.data.id); // TODO complete guess of the name of the ID field; figure it out
 }
 
 // most @actions toolkit packages have async methods
@@ -292,7 +296,6 @@ async function run() {
             break;
         case "request-to-review":
             await issue2pr(octokit);
-            await moveIssueCard(octokit);
             break;
         default:
             break;
