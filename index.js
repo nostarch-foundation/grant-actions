@@ -249,18 +249,19 @@ async function issue2pr(octokit) {
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
-    //var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + "), resolves #" + issueNum;
+    var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + "), resolves #" + issueNum;
     req = {
         owner: owner,
         repo: repo,
-        issue: issueNum,
         head: branchName,
         base: 'master',
         title: "[Review] Request by " + issueUser,
         maintainer_can_modify: true,
-        draft: true
+        draft: true,
+        body: PRbody
     };
-    console.log('Creating pull: ' + req);
+    console.log('Creating pull: ');
+    console.log(req);
     try {
         resp = await octokit.pulls.create(req);
     } catch (e) {
@@ -269,7 +270,7 @@ async function issue2pr(octokit) {
         console.log('rethrowing...');
         throw e;
     }
-    console.log(resp.status); // TODO proper success check
+    console.log(resp.status);
 }
 
 // most @actions toolkit packages have async methods
