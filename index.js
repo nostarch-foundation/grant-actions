@@ -1,6 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const crypto = require('crypto');
+//const crypto = require('crypto');
 
 // Returns the ID of the project specified by the projectURL action parameter.
 // If no such project exists, returns 0.
@@ -189,10 +189,11 @@ async function issue2pr(octokit) {
     var path = "grants/" + filename;
 
     // Check if the file already exists; note its hash if it does.
-    var fileInfo = octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+    var fileInfo = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}?ref={branch}', {
         owner: owner,
         repo: repo,
-        path: path
+        path: path,
+        branch: branchName
     });
     var sha = fileInfo.sha;
 
