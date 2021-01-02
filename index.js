@@ -188,7 +188,7 @@ async function issue2pr(octokit) {
     var filename = "grant-" + issueUser + "-" + issueNum + ".md";
     var path = "grants/" + filename;
     var commitMessage = "Request #" + issueNum + " by " + issueUser;
-    var fileContents = Buffer.from(github.context.payload.issue.body).toString('base64');
+    var fileContents = Buffer.from(github.context.payload.issue.body);
     var fileContentsHash = crypto.createHash('sha1').update(fileContents).digest('hex');
     console.log("creating file from issue #" + issueNum);
     req = {
@@ -197,7 +197,7 @@ async function issue2pr(octokit) {
         branch: branchName,
         path: path,
         message: commitMessage,
-        content: fileContents,
+        content: fileContents.toString('base64'),
         'committer.name': 'GitHub Action',
         'committer.email': 'action@github.com',
         'author.name': 'GitHub Action',
