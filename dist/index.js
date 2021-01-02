@@ -2213,21 +2213,12 @@ async function issue2pr(octokit) {
     } catch(e) {
         console.log("caught exception: " + e);
         console.log(e);
-        if (e.message.includes("already exists")) {
-            // Branch already exists. 
-            // Get the hash of the file we're about to create, if it exists.
-            req = {
-                // TODO
-            };
-            resp = await octokit.git.getFile(req);
-            console.log("fetched file:");
-            console.log(resp);
-            sha = resp.sha;
-            console.log("continuing...");
-        } else {
+        if (!e.message.includes("already exists")) {
             console.log("rethrowing...");
             throw e;
         }
+        // Branch already exists. Continue.
+        console.log("continuing...");
     }
 
     // create file from issue body and commit it to the branch
@@ -2237,6 +2228,7 @@ async function issue2pr(octokit) {
     var path = "grants/" + filename;
     var commitMessage = "Request #" + issueNum + " by " + issueUser;
     var fileContents = Buffer.from(github.context.payload.issue.body).toString('base64');
+    var fileContentsHash = crypto.createHash('sha1').update(fileContents).digest('hex');
     console.log("creating file from issue #" + issueNum);
     req = {
         owner: owner,
@@ -2249,7 +2241,7 @@ async function issue2pr(octokit) {
         'committer.email': 'action@github.com',
         'author.name': 'GitHub Action',
         'author.email': 'action@github.com',
-        sha: sha
+        sha: fileContentsHash
     };
     console.log('CreateOrUpdateFile:');
     console.log(req);
