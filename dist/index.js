@@ -498,7 +498,7 @@ module.exports = require("os");
 
 const core = __webpack_require__(470);
 const github = __webpack_require__(469);
-const crypto = __webpack_require__(417);
+//const crypto = require('crypto');
 
 // Returns the ID of the project specified by the projectURL action parameter.
 // If no such project exists, returns 0.
@@ -687,10 +687,11 @@ async function issue2pr(octokit) {
     var path = "grants/" + filename;
 
     // Check if the file already exists; note its hash if it does.
-    var fileInfo = octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+    var fileInfo = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}?ref={branch}', {
         owner: owner,
         repo: repo,
-        path: path
+        path: path,
+        branch: branchName
     });
     var sha = fileInfo.sha;
 
@@ -5216,13 +5217,6 @@ function Octokit(plugins, options) {
 /***/ (function(module) {
 
 module.exports = require("stream");
-
-/***/ }),
-
-/***/ 417:
-/***/ (function(module) {
-
-module.exports = require("crypto");
 
 /***/ }),
 
