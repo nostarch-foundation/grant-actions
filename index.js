@@ -1,5 +1,6 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
+const crypto = require('crypto');
 
 // Returns the ID of the project specified by the projectURL action parameter.
 // If no such project exists, returns 0.
