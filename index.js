@@ -187,9 +187,18 @@ async function issue2pr(octokit) {
     // https://octokit.github.io/rest.js/v17#repos-create-or-update-file
     var filename = "grant-" + issueUser + "-" + issueNum + ".md";
     var path = "grants/" + filename;
+
+    // Check if the file already exists; note its hash if it does.
+    var fileInfo = octokit.request('GET /repos/{owner}/{repo}/contents/{path}', {
+        owner: owner,
+        repo: repo,
+        path: path
+    });
+    var sha = fileInfo.sha;
+
     var commitMessage = "Request #" + issueNum + " by " + issueUser;
     var fileContents = Buffer.from(github.context.payload.issue.body);
-    var fileContentsHash = crypto.createHash('sha1').update(fileContents).digest('hex');
+    //var fileContentsHash = crypto.createHash('sha1').update(fileContents).digest('hex');
     console.log("creating file from issue #" + issueNum);
     req = {
         owner: owner,
@@ -202,7 +211,7 @@ async function issue2pr(octokit) {
         'committer.email': 'action@github.com',
         'author.name': 'GitHub Action',
         'author.email': 'action@github.com',
-        sha: fileContentsHash
+        sha: sha
     };
     console.log('CreateOrUpdateFile:');
     console.log(req);
