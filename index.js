@@ -82,7 +82,7 @@ async function createIssueCard(octokit) {
 
 // When an issue is given the 'Review' label, hide the issue card and add a PR
 // card to the 'Review' column.
-async function replaceIssueCardWithPRCard(octokit, prNum){
+async function replaceIssueCardWithPRCard(octokit, prID){
     console.log("moveIssueCard");
     // Find ID of column the card is currently in, using requestColumn action input.
     var colID = await getColumnIDByName(octokit, 'requestColumn');
@@ -116,20 +116,28 @@ async function replaceIssueCardWithPRCard(octokit, prNum){
         throw "Card " + github.context.payload.issue.url + " not found.";
     }
     
-    // Find ID of column to put card in.
-    colID = await getColumnIDByName(octokit, 'reviewColumn');
-    if (colID == 0) {
-        throw "Column not found.";
-    }
-    
-    // https://octokit.github.io/rest.js/v17#projects-move-card
-    resp = await octokit.projects.moveCard({
+    // https://octokit.github.io/rest.js/v17#projects-update-card
+    resp = await octokit.projects.updateCard({
         card_id: cardID,
-        position: "top",
-        column_id: colID,
+        archived: true  // Archive the old card.
     });
-    console.log("Moved card " + github.context.payload.issue.url);
+    console.log("Archived card " + github.context.payload.issue.url);
     console.log(resp.status);
+    
+    // Create a new card to replace the old one.
+    // Find ID of column to put card in.
+    var reviewColID = await getColumnIDByName(octokit, 'reviewColumn');
+    if (reviewColID == 0) {
+        throw "Column 'reviewColumn' not found.";
+    }
+    console.log("Creating card for PR " + prID);
+    resp = await octokit.projects.createCard({
+        column_id: reviewColID,
+        content_id: prID,
+        content_type: "Pull Request"
+    })
+    console.log("Created card for PR " + prID);
+    console.log(resp);
 }
 
 // When an issue is given the ‘review’ label, convert it to a pull request.
@@ -250,7 +258,7 @@ async function issue2pr(octokit) {
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
-    var PRbody = "# Grant request for review. \n Submitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + "), resolves #" + issueNum;
+    var PRbody = "# Grant request for review. \nSubmitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + "), resolves #" + issueNum;
     req = {
         owner: owner,
         repo: repo,
@@ -263,18 +271,24 @@ async function issue2pr(octokit) {
     };
     console.log('Creating pull: ');
     console.log(req);
+    var prID = -1;
     try {
         resp = await octokit.pulls.create(req);
+        console.log(resp);
+        console.log(resp.status);
+        prID = resp.data.id; // TODO complete guess of the name of the ID field; figure it out.
     } catch (e) {
         console.log('saw exception: ' + e);
         console.log(e);
-        console.log('rethrowing...');
-        throw e;
+        if (!e.message.includes('A pull request already exists')) {
+            console.log('rethrowing...');
+            throw e;
+        }
+        // TODO get ID of PR that already exists.
+        console.log('continuing...');
     }
-    console.log(resp);
-    console.log(resp.status);
 
-    await replaceIssueCardWithPRCard(octokit, resp.data.id); // TODO complete guess of the name of the ID field; figure it out
+    await replaceIssueCardWithPRCard(octokit, prID); 
 }
 
 // most @actions toolkit packages have async methods
