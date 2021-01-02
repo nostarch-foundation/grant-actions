@@ -687,13 +687,16 @@ async function issue2pr(octokit) {
     var path = "grants/" + filename;
 
     // Check if the file already exists; note its hash if it does.
+    console.log('checking for file ' + path);
     var fileInfo = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}?ref={branch}', {
         owner: owner,
         repo: repo,
         path: path,
         branch: branchName
     });
-    var sha = fileInfo.sha;
+    console.log("found file:");
+    console.log(fileInfo);
+    var sha = fileInfo.sha ? fileInfo.sha : "";
 
     var commitMessage = "Request #" + issueNum + " by " + issueUser;
     var fileContents = Buffer.from(github.context.payload.issue.body);
