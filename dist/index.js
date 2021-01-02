@@ -2199,7 +2199,6 @@ async function issue2pr(octokit) {
     var issueUser = github.context.payload.issue.user.login;
     var issueNum = github.context.payload.issue.number;
     var branchName = "request-" + issueUser + "-" + issueNum;
-    var sha = '';
     var req = {
         owner: owner,
         repo: repo,
