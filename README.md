@@ -50,15 +50,25 @@ async function run() {
 run()
 ```
 
-See the [toolkit
-documentation](https://github.com/actions/toolkit/blob/master/README.md#packages)
-for the various packages.
+### Documentation
+
+The majority of the documentation that exists for the Octokit Node.js library
+can be found at https://octokit.github.io/rest.js/v17, in one very long
+document (stylish, but annoying). For convenience, our code links in comments
+directly to the doc for each API call made.
+
+However, the Octokit docs aren't complete: they do not specify the format of
+data returned by the API. To figure out the contents of API responses, the only
+reference is the raw "dereferenced" API description, [found
+here](https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/dereferenced/api.github.com.deref.yaml)
+(warning: >10MB YAML document). It's ugly and meant for machines, not humans,
+but it will at least tell you what you need to know, given some effort.
 
 ## Release
 
-GitHub Actions will run the entry point from the action.yml. Packaging
-assembles the code into one file that can be checked in to Git, enabling fast
-and reliable execution and preventing the need to check in node_modules.
+GitHub Actions will run the entry point from `action.yml`. Packaging assembles
+the code into one file that can be checked in to Git, enabling fast and
+reliable execution and preventing the need to check in `node_modules`.
 
 Actions are run from GitHub repos. Packaging the action will create a packaged
 action in the `dist/` folder.
