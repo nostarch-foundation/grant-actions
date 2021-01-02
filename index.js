@@ -187,22 +187,37 @@ async function issue2pr(octokit) {
     // https://octokit.github.io/rest.js/v17#repos-create-or-update-file
     var filename = "grant-" + issueUser + "-" + issueNum + ".md";
     var path = "grants/" + filename;
-
-    // Check if the file already exists; note its hash if it does.
+    // Check for existence of the file we're about to try to write, note what
+    // GH thinks its current SHA1 hash is. The way that GitHub computes file
+    // SHA1 hashes is mysterious and idiosyncratic; I (ericdand) have been
+    // unable to get a matching hash from the original data no matter how I
+    // encode or pad the data. Just use whatever GH thinks the hash is.
+    var sha = '';
     console.log('checking for file ' + path);
-    var fileInfo = await octokit.request('GET /repos/{owner}/{repo}/contents/{path}?ref={branch}', {
-        owner: owner,
-        repo: repo,
-        path: path,
-        branch: branchName
-    });
-    console.log("found file:");
-    console.log(fileInfo);
-    var sha = fileInfo.sha ? fileInfo.sha : "";
+    try {
+        var fileInfo = await octokit.request(
+            'GET /repos/{owner}/{repo}/contents/{path}?ref={branch}', {
+                owner: owner,
+                repo: repo,
+                path: path,
+                branch: branchName
+        });
+        console.log("found file:");
+        console.log(fileInfo);
+        sha = fileInfo.data.sha;
+    } catch (e) {
+        if (!e.status == 404) {
+            console.log('caught exception: ' + e);
+            console.log(e);
+            console.log('rethrowing...');
+            throw e
+        }
+        console.log('file not found; this is expected');
+    }
+
 
     var commitMessage = "Request #" + issueNum + " by " + issueUser;
     var fileContents = Buffer.from(github.context.payload.issue.body);
-    //var fileContentsHash = crypto.createHash('sha1').update(fileContents).digest('hex');
     console.log("creating file from issue #" + issueNum);
     req = {
         owner: owner,
@@ -214,9 +229,11 @@ async function issue2pr(octokit) {
         'committer.name': 'GitHub Action',
         'committer.email': 'action@github.com',
         'author.name': 'GitHub Action',
-        'author.email': 'action@github.com',
-        sha: sha
+        'author.email': 'action@github.com'
     };
+    if (sha != '') {
+        req.sha = sha;
+    }
     console.log('CreateOrUpdateFile:');
     console.log(req);
     try {
