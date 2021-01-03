@@ -791,6 +791,8 @@ async function issue2pr(octokit) {
             direction: 'desc'
         });
         for (const pull of resp.data) {
+            console.log("DEBUG: ");
+            console.log(pull); // TODO DEBUG DELETEME
             if (pull.issue_url == github.context.payload.issue.url) {
                 console.log('found pull request #' + pull.id);
                 prID = pull.id;
