@@ -591,11 +591,11 @@ async function replaceIssueCardWithPRCard(octokit, prID){
     // List cards in that column.
     // https://octokit.github.io/rest.js/v17#projects-list-cards
     // TODO only gets first page, paginate to get more than 30 cards
+    console.log("Cards list for column 'requestColumn'");
     var resp = await octokit.projects.listCards({
         column_id: colID,
         archived_state: 'not_archived',
     });
-    console.log("Cards list");
     console.log(resp.status);
     
     // Get ID of card to move, by matching issue URLs.
@@ -611,7 +611,7 @@ async function replaceIssueCardWithPRCard(octokit, prID){
         }
     }
     if (cardID == 0) {
-        throw "Card " + github.context.payload.issue.url + " not found.";
+        throw "Card for issue " + github.context.payload.issue.url + " not found.";
     }
     
     // https://octokit.github.io/rest.js/v17#projects-update-card
@@ -777,12 +777,29 @@ async function issue2pr(octokit) {
         prID = resp.data.id; // TODO complete guess of the name of the ID field; figure it out.
     } catch (e) {
         console.log('saw exception: ' + e);
-        console.log(e);
         if (!e.message.includes('A pull request already exists')) {
+            console.log(e);
             console.log('rethrowing...');
             throw e;
         }
-        // TODO get ID of PR that already exists.
+        console.log('finding ID of already-existing pull request.');
+        console.log('listing pull requests...');
+        resp = await octokit.pulls.list({
+            owner: owner,
+            repo: repo,
+            sort: 'updated', // TODO paginate properly, rather than just fetching newest pulls and assuming it'll be there.
+            direction: 'desc'
+        });
+        for (const pull of resp.data) {
+            if (pull.issue_url == github.context.payload.issue.url) {
+                console.log('found pull request #' + pull.id);
+                prID = pull.id;
+                break;
+            }
+        }
+        if (prID < 0) {
+            throw 'pull request ID not found';
+        }
         console.log('continuing...');
     }
 
