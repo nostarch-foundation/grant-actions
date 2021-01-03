@@ -498,7 +498,6 @@ module.exports = require("os");
 
 const core = __webpack_require__(470);
 const github = __webpack_require__(469);
-//const crypto = require('crypto');
 
 // Returns the ID of the project specified by the projectURL action parameter.
 // If no such project exists, returns 0.
@@ -724,7 +723,6 @@ async function issue2pr(octokit) {
         console.log('file not found; this is expected');
     }
 
-
     var commitMessage = "Request #" + issueNum + " by " + issueUser;
     var fileContents = Buffer.from(github.context.payload.issue.body);
     console.log("creating file from issue #" + issueNum);
@@ -776,7 +774,7 @@ async function issue2pr(octokit) {
         resp = await octokit.pulls.create(req);
         console.log(resp);
         console.log(resp.status);
-        prID = resp.data.id; // TODO complete guess of the name of the ID field; double-check this.
+        prID = resp.data.id;
     } catch (e) {
         console.log('saw exception: ' + e);
         if (!e.message.includes('A pull request already exists')) {
