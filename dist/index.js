@@ -579,9 +579,10 @@ async function createIssueCard(octokit) {
 }
 
 // When an issue is given the 'Review' label, hide the issue card and add a PR
-// card to the 'Review' column.
+// card to the 'Review' column. Note that the ID of a PR is not the same as its
+// number; the ID is a random number which must be retrieved using the GH API.
 async function replaceIssueCardWithPRCard(octokit, prID){
-    console.log("moveIssueCard");
+    console.log("replaceIssueCardWithPRCard");
     // Find ID of column the card is currently in, using requestColumn action input.
     var colID = await getColumnIDByName(octokit, 'requestColumn');
     if (colID == 0) {
@@ -628,11 +629,11 @@ async function replaceIssueCardWithPRCard(octokit, prID){
     if (reviewColID == 0) {
         throw "Column 'reviewColumn' not found.";
     }
-    console.log("Creating card for PR " + prID);
+    console.log("Creating card for PR with ID " + prID);
     resp = await octokit.projects.createCard({
         column_id: reviewColID,
         content_id: prID,
-        content_type: "Pull Request"
+        content_type: "PullRequest"
     })
     console.log("Created card for PR " + prID);
     console.log(resp);
@@ -792,9 +793,8 @@ async function issue2pr(octokit) {
         });
         for (const pull of resp.data) {
             console.log("DEBUG: ");
-            console.log(pull); // TODO DEBUG DELETEME
-            if (pull.issue_url == github.context.payload.issue.url) {
-                console.log('found pull request #' + pull.id);
+            if (pull.body.includes('resolves #' + issueNum)) {
+                console.log('found pull request #' + pull.number);
                 prID = pull.id;
                 break;
             }
