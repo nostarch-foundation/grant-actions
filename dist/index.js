@@ -612,16 +612,17 @@ async function replaceIssueCardWithPRCard(octokit, prID){
         }
     }
     if (cardID == 0) {
-        throw "Card for issue " + github.context.payload.issue.url + " not found.";
+        console.log("Card for issue " + github.context.payload.issue.url + " not found.");
+        console.log("Assuming it has already been archived. Continuing...");
+    } else {
+        // https://octokit.github.io/rest.js/v17#projects-update-card
+        resp = await octokit.projects.updateCard({
+            card_id: cardID,
+            archived: true  // Archive the old card.
+        });
+        console.log("Archived card " + github.context.payload.issue.url);
+        console.log(resp.status);
     }
-    
-    // https://octokit.github.io/rest.js/v17#projects-update-card
-    resp = await octokit.projects.updateCard({
-        card_id: cardID,
-        archived: true  // Archive the old card.
-    });
-    console.log("Archived card " + github.context.payload.issue.url);
-    console.log(resp.status);
     
     // Create a new card to replace the old one.
     // Find ID of column to put card in.
@@ -775,7 +776,7 @@ async function issue2pr(octokit) {
         resp = await octokit.pulls.create(req);
         console.log(resp);
         console.log(resp.status);
-        prID = resp.data.id; // TODO complete guess of the name of the ID field; figure it out.
+        prID = resp.data.id; // TODO complete guess of the name of the ID field; double-check this.
     } catch (e) {
         console.log('saw exception: ' + e);
         if (!e.message.includes('A pull request already exists')) {
@@ -788,11 +789,10 @@ async function issue2pr(octokit) {
         resp = await octokit.pulls.list({
             owner: owner,
             repo: repo,
-            sort: 'updated', // TODO paginate properly, rather than just fetching newest pulls and assuming it'll be there.
+            sort: 'updated', // TODO(ericdand): paginate.
             direction: 'desc'
         });
         for (const pull of resp.data) {
-            console.log("DEBUG: ");
             if (pull.body.includes('resolves #' + issueNum)) {
                 console.log('found pull request #' + pull.number);
                 prID = pull.id;
