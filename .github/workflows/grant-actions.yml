@@ -17,7 +17,6 @@ jobs:
                 step: 'card-for-request'
                 projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
                 requestColumn: 'Applications'
-                reviewColumn: 'To Review'
             - name: move-request-to-review
               uses: ./
               if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'Review'
