@@ -17,7 +17,7 @@ jobs:
         steps:
             - uses: actions/checkout@v1
             - name: add-project-card-for-issue
-              uses: ./
+              uses: nostarch-foundation/grant-actions
               if: github.event_name == 'issues' && github.event.action == 'opened'
               with:
                 myToken: ${{ secrets.GITHUB_TOKEN }}
@@ -25,7 +25,7 @@ jobs:
                 projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
                 requestColumn: 'Applications'
             - name: move-request-to-review
-              uses: ./
+              uses: nostarch-foundation/grant-actions
               if: github.event_name == 'issues' && github.event.action == 'labeled' && github.event.label.name == 'Review'
               with:
                 myToken: ${{ secrets.GITHUB_TOKEN }}
