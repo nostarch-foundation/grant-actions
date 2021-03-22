@@ -27,11 +27,4 @@ jobs:
                 requestColumn: 'Applications'
                 reviewColumn: 'To Review'
 
-#        - name: move-issue-card-to-review-column
-#          uses: ./
-#          if: github.event_name == 'pull_request' && github.event.action == 'opened'
-#          with:  
-#            myToken: ${{ secrets.GITHUB_TOKEN }}
-#            step: 'moveIssuecard'
-#            projectURL: 'https://github.com/nostarch-foundation/grant-actions/projects/1'
-#            columnName: 'Review'
+

@@ -47,7 +47,7 @@ jobs:
 If it complains about eslint, run:
 `npn install eslint`
 
-Note: Tests currently don't test action behaviour, just syntax errors.
+Note: doesn't currently test action behaviour, just that it runs.
 
 4. Run:
 `npm run package`
