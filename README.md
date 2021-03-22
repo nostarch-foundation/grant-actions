@@ -34,3 +34,18 @@ jobs:
                 requestColumn: 'Applications'
                 reviewColumn: 'To Review'
 ```
+
+## Modification
+
+To modify the action, you need to install nodejs, make your changes (code in index.js, inputs and conditions in .github/workflows/grant-actions.yml), then run:
+`npm test`
+
+If it complains about eslint, run:
+`npn install eslint`
+
+Then run:
+`npm run package`
+
+Packaging copies index.js into dist/index.js, which is the file the action actually uses.
+
+Then commit and push the change.
