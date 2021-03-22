@@ -258,13 +258,14 @@ async function issue2pr(octokit) {
     // create pull request for the branch
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
-    var PRbody = "# Grant request for review. \nSubmitted by " + issueUser + ", [original issue](" + github.context.payload.issue.url + "), resolves #" + issueNum;
+	var PRtitle = "[Review] Request by " + issueUser;
+    var PRbody = "[Click here to review application](" + github.context.payload.issue.html_url + ")";
     req = {
         owner: owner,
         repo: repo,
         head: branchName,
         base: 'master',
-        title: "[Review] Request by " + issueUser,
+        title: PRtitle,
         maintainer_can_modify: true,
         draft: false,
         body: PRbody
