@@ -37,15 +37,21 @@ jobs:
 
 ## Modification
 
-To modify the action, you need to install nodejs, make your changes (code in index.js, inputs and conditions in .github/workflows/grant-actions.yml), then run:
+1. Install nodejs.
+
+2. Clone the repo and make your changes (code in index.js, inputs and conditions in .github/workflows/grant-actions.yml).
+
+3. Run:
 `npm test`
 
 If it complains about eslint, run:
 `npn install eslint`
 
-Then run:
+Note: Tests currently don't test action behaviour, just syntax errors.
+
+4. Run:
 `npm run package`
 
 Packaging copies index.js into dist/index.js, which is the file the action actually uses.
 
-Then commit and push the change.
+5. Commit and push the change.
