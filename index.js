@@ -266,7 +266,7 @@ async function issue2pr(octokit) {
         base: 'master',
         title: "[Review] Request by " + issueUser,
         maintainer_can_modify: true,
-        draft: true,
+        draft: false,
         body: PRbody
     };
     console.log('Creating pull: ');
