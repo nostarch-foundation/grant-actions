@@ -757,7 +757,7 @@ async function issue2pr(octokit) {
     // https://developer.github.com/v3/pulls/#create-a-pull-request
     // https://octokit.github.io/rest.js/v17#pulls-create
 	var PRtitle = "[Review] Request by " + issueUser;
-    var PRbody = "[Click here to review application](" + github.context.payload.issue.html_url + ")";
+    var PRbody = "[View application discussion](" + github.context.payload.issue.html_url + ")";
     req = {
         owner: owner,
         repo: repo,
